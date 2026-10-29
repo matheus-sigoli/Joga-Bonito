@@ -1,0 +1,20 @@
+digraph A {
+  graph [rankdir=TB, fontname="Arial", nodesep=0.4, ranksep=0.45, pad=0.3, bgcolor=white];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11, fillcolor="#E8F2EB", color="#0E552A", penwidth=1.4];
+  edge [color="#0E552A", fontname="Arial", fontsize=9];
+  subgraph cluster_c { label="Clientes"; fontname="Arial Bold"; style="rounded,dashed"; color="#999999";
+    web [label="Site (HTML5 · CSS3 · JavaScript)\ncatálogo · carrinho · checkout · painel admin", fillcolor="#FFF6CC", color="#C9A000"];
+    app [label="App Flutter (Android / iOS)\nloja · carrinho · checkout · pedidos", fillcolor="#FFF6CC", color="#C9A000"];
+  }
+  subgraph cluster_api { label="API REST .NET 8 (JogaBonito.Api)"; fontname="Arial Bold"; style="rounded"; color="#0E552A";
+    mw [label="Middleware: erros · cabeçalhos de segurança · CORS · JWT · rate limit"];
+    end [label="Endpoints: /api/auth · /api/produtos · /api/pedidos · /api/admin"];
+    srv [label="Application: AuthServico · CatalogoServico · PedidoServico\n(DTOs + interfaces)"];
+    dom [label="Domain: Usuario · Produto ⟵ Camisa / Chuteira · Pedido · Cupom · RegraFrete", fillcolor="#0E552A", fontcolor=white];
+    inf [label="Infrastructure: repositórios ADO.NET · JwtGeradorToken · BCryptHasher"];
+    mw -> end -> srv; srv -> dom; srv -> inf [label=" interfaces"];
+  }
+  db [label="SQL Server — JogaBonitoDB\n13 tabelas · 3 views · 2 funções · 9 procedures · 3 triggers", shape=cylinder, fillcolor="#0E552A", fontcolor=white];
+  web -> mw [label=" HTTPS + JSON\n Bearer JWT"]; app -> mw [label=" HTTPS + JSON\n Bearer JWT"];
+  inf -> db [label=" consultas parametrizadas, pool\n e retentativa · stored procedures"];
+}

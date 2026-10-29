@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidade — Joga Bonito</title>
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container texto-legal">
+    <h1 class="titulo-secao">Política de Privacidade</h1>
+    <p class="texto-suave">Em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p>
+
+    <h2>Quais dados coletamos</h2>
+    <p>Nome, e-mail, senha (guardada apenas como hash criptográfico BCrypt — nem a equipe consegue lê-la), endereço de entrega e histórico de pedidos.</p>
+
+    <h2>Para que usamos</h2>
+    <p>Somente para criar sua conta, processar pagamentos, entregar pedidos e responder ao atendimento. Não vendemos nem compartilhamos dados com terceiros para publicidade.</p>
+
+    <h2>Dados de cartão</h2>
+    <p>Os dados do cartão não são armazenados pela Joga Bonito. Neste projeto acadêmico, o pagamento é simulado e esses dados nem chegam ao servidor.</p>
+
+    <h2>Seus direitos</h2>
+    <p>Os direitos da LGPD (art. 18) ficam na sua conta, em <a href="pedidos.html#conta-dados">Meus pedidos › Meus dados</a>, sem precisar mandar e-mail:</p>
+    <ul>
+      <li><strong>Acesso e portabilidade:</strong> o botão “Baixar meus dados” gera um arquivo com conta, endereços, pedidos, avaliações e histórico de acessos.</li>
+      <li><strong>Exclusão:</strong> “Excluir minha conta” (com a sua senha) apaga nome, e-mail, endereços e avaliações e desativa a conta na hora. Os pedidos continuam guardados <em>sem dados pessoais</em>, porque a loja precisa mantê-los por obrigação fiscal (LGPD, art. 16, I).</li>
+      <li><strong>Correção:</strong> nome e e-mail podem ser corrigidos pelo atendimento (privacidade@jogabonito.com.br); a troca de senha é feita por você em “Segurança da conta”.</li>
+    </ul>
+    <p>Só você, logado e com a sua senha, consegue baixar ou excluir os seus dados.</p>
+
+    <h2>Segurança</h2>
+    <p>Comunicação por HTTPS em produção, autenticação por token JWT com validade limitada, consultas parametrizadas contra SQL Injection e registro de auditoria das alterações de estoque.</p>
+
+    <p class="texto-suave"><small>Joga Bonito é uma empresa fictícia criada para o PIM IV — UNIP 2026/2.</small></p>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+</body>
+</html>

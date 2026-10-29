@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produto — Joga Bonito</title>
+  <meta name="description" content="Detalhes, tamanhos, avaliações e compra do produto na Joga Bonito.">
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container produto-pagina">
+    <nav class="trilha" aria-label="Você está em">
+      <a href="inicial.html">Início</a> <span aria-hidden="true">/</span>
+      <a href="catalogo.html" id="trilha-categoria">Catálogo</a> <span aria-hidden="true">/</span>
+      <span id="trilha-produto">Produto</span>
+    </nav>
+
+    <div id="aviso-offline-area"></div>
+
+    <div class="produto" id="produto" hidden>
+      <!-- GALERIA -->
+      <section class="galeria" aria-label="Fotos do produto">
+        <div class="galeria-principal">
+          <button class="galeria-seta anterior" id="foto-anterior" aria-label="Foto anterior">‹</button>
+          <img id="foto-principal" alt="" tabindex="0">
+          <button class="galeria-seta proxima" id="foto-proxima" aria-label="Próxima foto">›</button>
+        </div>
+        <div class="miniaturas" id="miniaturas"></div>
+      </section>
+
+      <!-- INFORMAÇÕES -->
+      <section class="produto-info" aria-labelledby="produto-nome">
+        <h1 id="produto-nome"></h1>
+        <p class="produto-sub" id="produto-modelo"></p>
+        <p class="produto-nota" id="produto-nota"></p>
+
+        <div class="produto-preco" id="produto-preco"></div>
+
+        <div class="tamanhos-bloco">
+          <div class="tamanhos-topo">
+            <span id="rotulo-tamanho">Escolha o tamanho</span>
+            <button type="button" class="link-botao" id="abrir-guia">Guia de medidas</button>
+          </div>
+          <div class="tamanhos" id="tamanhos" role="radiogroup" aria-labelledby="rotulo-tamanho"></div>
+          <p class="estoque-info" id="estoque-info" aria-live="polite"></p>
+        </div>
+
+        <div class="comprar-linha">
+          <div class="qtd" role="group" aria-label="Quantidade">
+            <button type="button" id="qtd-menos" aria-label="Diminuir quantidade">−</button>
+            <span id="qtd" aria-live="polite">1</span>
+            <button type="button" id="qtd-mais" aria-label="Aumentar quantidade">+</button>
+          </div>
+          <button class="btn btn-primario" id="btn-adicionar">Adicionar ao carrinho</button>
+        </div>
+        <p class="erro-campo" id="erro-tamanho" role="alert"></p>
+
+        <ul class="garantias">
+          <li>Frete grátis acima de R$ 299,00</li>
+          <li>Primeira troca de tamanho grátis em 30 dias</li>
+          <li>Qualidade verificada antes do envio</li>
+        </ul>
+
+        <form class="frete-cep" id="form-frete" novalidate>
+          <label for="cep-frete">Calcule o frete e o prazo</label>
+          <div class="frete-linha">
+            <input id="cep-frete" name="cep" class="entrada" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9">
+            <button class="btn btn-contorno btn-pequeno" type="submit">Calcular</button>
+          </div>
+          <p class="frete-resultado" id="frete-resultado" aria-live="polite"></p>
+        </form>
+
+        <details class="descricao" open>
+          <summary>Descrição</summary>
+          <p id="produto-descricao"></p>
+        </details>
+      </section>
+    </div>
+
+    <!-- EM CAMPO: o craque que vestiu esta camisa / a história da camisa retrô -->
+    <section class="em-campo" id="em-campo" hidden aria-labelledby="titulo-em-campo"></section>
+
+    <!-- FICHA COMPLETA -->
+    <section class="ficha-completa" id="ficha-completa" hidden aria-labelledby="titulo-ficha">
+      <h2 class="titulo-secao" id="titulo-ficha">Tudo sobre a peça</h2>
+      <div id="ficha-abas"></div>
+    </section>
+
+    <div class="vazio" id="produto-erro" hidden></div>
+
+    <!-- AVALIAÇÕES -->
+    <section class="avaliacoes" id="avaliacoes" aria-labelledby="titulo-avaliacoes" hidden>
+      <h2 class="titulo-secao" id="titulo-avaliacoes">Avaliações</h2>
+      <div class="avaliacoes-layout">
+        <div class="avaliacoes-resumo painel" id="avaliacoes-resumo"></div>
+        <div>
+          <div id="lista-avaliacoes"></div>
+          <form class="painel form-avaliacao" id="form-avaliacao" hidden>
+            <h3>Avalie este produto</h3>
+            <fieldset class="nota-escolha">
+              <legend class="sr-only">Nota</legend>
+              <input type="radio" id="n5" name="nota" value="5"><label for="n5" title="5 estrelas"><span aria-hidden="true">★</span><span class="sr-only">5 estrelas</span></label>
+              <input type="radio" id="n4" name="nota" value="4"><label for="n4" title="4 estrelas"><span aria-hidden="true">★</span><span class="sr-only">4 estrelas</span></label>
+              <input type="radio" id="n3" name="nota" value="3"><label for="n3" title="3 estrelas"><span aria-hidden="true">★</span><span class="sr-only">3 estrelas</span></label>
+              <input type="radio" id="n2" name="nota" value="2"><label for="n2" title="2 estrelas"><span aria-hidden="true">★</span><span class="sr-only">2 estrelas</span></label>
+              <input type="radio" id="n1" name="nota" value="1"><label for="n1" title="1 estrela"><span aria-hidden="true">★</span><span class="sr-only">1 estrela</span></label>
+            </fieldset>
+            <div class="campo">
+              <label for="comentario">Comentário (opcional)</label>
+              <textarea id="comentario" maxlength="500" placeholder="Como ficou o tamanho? E o acabamento?"></textarea>
+            </div>
+            <div id="aviso-avaliacao" class="aviso" hidden></div>
+            <button class="btn btn-verde" type="submit">Enviar avaliação</button>
+            <p class="ajuda texto-suave">Somente quem comprou o produto pode avaliar.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECOMENDADOS -->
+    <section class="vitrine" aria-labelledby="titulo-recomendados">
+      <h2 class="titulo-secao" id="titulo-recomendados">Você também pode gostar</h2>
+      <div class="grade-produtos" id="recomendados"></div>
+    </section>
+  </main>
+
+  <!-- ZOOM -->
+  <dialog class="modal modal-zoom" id="zoom">
+    <button class="modal-fechar" aria-label="Fechar" data-fechar-dialogo>✕</button>
+    <img id="zoom-img" alt="">
+  </dialog>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/catalogo-local.js"></script>
+  <script src="../Javascript/vitrine-info.js"></script>
+  <script src="../Javascript/produto.js"></script>
+</body>
+</html>

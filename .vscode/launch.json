@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Joga Bonito: API + loja",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "preparar-depuracao",
+      "program": "${workspaceFolder}/Site/backend/bin/Debug/net8.0/JogaBonito.Api.dll",
+      "cwd": "${workspaceFolder}/Site/backend",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Urls": "http://localhost:5000"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "Now listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/HTML/login.html"
+      }
+    }
+  ]
+}

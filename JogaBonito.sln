@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JogaBonito.Api", "Site\backend\JogaBonito.Api.csproj", "{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E61}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JogaBonito.Tests", "Site\tests\JogaBonito.Tests\JogaBonito.Tests.csproj", "{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JogaBonito.IntegrationTests", "Site\tests\JogaBonito.IntegrationTests\JogaBonito.IntegrationTests.csproj", "{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E63}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F1C2A10-1B5E-4D7A-9C3E-1A2B3C4D5E63}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel administrativo — Joga Bonito</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container admin">
+    <div class="admin-topo">
+      <div>
+        <h1 class="titulo-secao">Painel administrativo</h1>
+      </div>
+      <a class="btn btn-contorno btn-pequeno" href="/swagger" target="_blank" rel="noopener" id="link-swagger">Documentação da API ↗</a>
+    </div>
+
+    <div class="abas" role="tablist" aria-label="Seções do painel">
+      <button role="tab" aria-selected="true" aria-controls="aba-visao" id="tab-visao">Visão geral</button>
+      <button role="tab" aria-selected="false" aria-controls="aba-pedidos" id="tab-pedidos">Pedidos</button>
+      <button role="tab" aria-selected="false" aria-controls="aba-estoque" id="tab-estoque">Estoque</button>
+      <button role="tab" aria-selected="false" aria-controls="aba-produtos" id="tab-produtos">Produtos</button>
+      <button role="tab" aria-selected="false" aria-controls="aba-banco" id="tab-banco">Banco de dados</button>
+      <button role="tab" aria-selected="false" aria-controls="aba-avaliacoes" id="tab-avaliacoes">Avaliações <span class="contador-aba" id="contador-pendentes" hidden></span></button>
+      <button role="tab" aria-selected="false" aria-controls="aba-acessos" id="tab-acessos">Acessos</button>
+    </div>
+
+    <div id="aviso-admin" class="aviso" hidden></div>
+
+    <!-- VISÃO GERAL -->
+    <section role="tabpanel" id="aba-visao" aria-labelledby="tab-visao">
+      <div class="status-conexoes" id="status-conexoes" aria-live="polite"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="admin-duas">
+        <div class="painel">
+          <h2>Vendas por categoria <small class="texto-suave">(últimos 30 dias)</small></h2>
+          <div id="grafico-categorias"></div>
+        </div>
+        <div class="painel">
+          <h2>Mais vendidos</h2>
+          <ol class="ranking" id="mais-vendidos"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- PEDIDOS -->
+    <section role="tabpanel" id="aba-pedidos" aria-labelledby="tab-pedidos" hidden>
+      <div class="filtro-linha">
+        <label for="filtro-status">Status</label>
+        <select id="filtro-status" class="entrada">
+          <option value="">Todos</option>
+          <option>Pago</option><option>Em Separação</option><option>Enviado</option>
+          <option>Entregue</option><option>Cancelado</option>
+        </select>
+      </div>
+      <div class="tabela-rolagem painel">
+        <table class="tabela">
+          <thead><tr><th>#</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Pagamento</th><th>Origem</th><th>Status</th><th>Ação</th></tr></thead>
+          <tbody id="tabela-pedidos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ESTOQUE -->
+    <section role="tabpanel" id="aba-estoque" aria-labelledby="tab-estoque" hidden>
+      <div class="filtro-linha">
+        <label for="busca-estoque">Produto</label>
+        <input id="busca-estoque" class="entrada" placeholder="Filtrar por nome">
+        <label class="opcao"><input type="checkbox" id="so-criticos"> Só esgotados / baixos</label>
+      </div>
+      <div class="tabela-rolagem painel">
+        <table class="tabela">
+          <thead><tr><th>Produto</th><th>Categoria</th><th>Grade e saldo por tamanho</th></tr></thead>
+          <tbody id="tabela-estoque"></tbody>
+        </table>
+      </div>
+      <h2 class="subtitulo-admin">Auditoria de estoque <small class="texto-suave">(trigger trg_AuditoriaEstoque)</small></h2>
+      <div class="tabela-rolagem painel">
+        <table class="tabela">
+          <thead><tr><th>Data</th><th>Produto</th><th>Tam.</th><th>Antes</th><th>Depois</th><th>Origem</th></tr></thead>
+          <tbody id="tabela-auditoria"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PRODUTOS -->
+    <section role="tabpanel" id="aba-produtos" aria-labelledby="tab-produtos" hidden>
+      <div class="admin-duas admin-produtos">
+        <div class="tabela-rolagem painel">
+          <table class="tabela">
+            <thead><tr><th>#</th><th>Produto</th><th>Linha</th><th>Preço</th><th>Estoque</th><th></th></tr></thead>
+            <tbody id="tabela-produtos"></tbody>
+          </table>
+        </div>
+        <form class="painel" id="form-produto" novalidate>
+          <h2 id="titulo-form-produto">Novo produto</h2>
+          <input type="hidden" id="produto-id">
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="p-categoria">Categoria</label>
+              <select id="p-categoria" required></select>
+            </div>
+            <div class="campo">
+              <label for="p-linha">Linha</label>
+              <select id="p-linha" required></select>
+            </div>
+          </div>
+          <div class="campo"><label for="p-nome">Nome</label><input id="p-nome" required maxlength="100"></div>
+          <div class="campo"><label for="p-modelo">Modelo / subtítulo</label><input id="p-modelo" maxlength="100" placeholder="Torcedor · Temporada 2026"></div>
+          <div class="linha-campos" id="campos-camisa">
+            <div class="campo"><label for="p-equipe">Clube / seleção</label><input id="p-equipe" maxlength="60"></div>
+            <div class="campo"><label for="p-ano">Ano</label><input id="p-ano" type="number" min="1900" max="2100"></div>
+          </div>
+          <div class="linha-campos" id="campos-chuteira" hidden>
+            <div class="campo"><label for="p-marca">Marca</label><input id="p-marca" maxlength="40" list="marcas" placeholder="Nike"></div>
+            <div class="campo">
+              <label for="p-solado">Tipo de solado</label>
+              <select id="p-solado">
+                <option>FG — campo</option>
+                <option>TF — society</option>
+                <option>IC — quadra</option>
+                <option>Indoor — quadra</option>
+              </select>
+            </div>
+            <datalist id="marcas"><option value="Nike"><option value="adidas"></datalist>
+          </div>
+          <div class="linha-campos">
+            <div class="campo"><label for="p-preco">Preço (R$)</label><input id="p-preco" type="number" step="0.01" min="0" required></div>
+            <div class="campo"><label for="p-promo">Promocional (R$)</label><input id="p-promo" type="number" step="0.01" min="0"></div>
+          </div>
+          <div class="campo"><label for="p-descricao">Descrição</label><textarea id="p-descricao" required maxlength="1000"></textarea></div>
+          <div class="campo">
+            <label for="p-imagens">Imagens (uma URL por linha; a primeira é a capa)</label>
+            <textarea id="p-imagens" placeholder="../IMG/Produtos/37/1.jpg"></textarea>
+          </div>
+          <label class="check"><input type="checkbox" id="p-destaque"> <span>Destacar na página inicial</span></label>
+          <div id="aviso-produto" class="aviso" hidden></div>
+          <div class="botoes-etapa">
+            <button type="button" class="btn btn-contorno" id="novo-produto">Limpar</button>
+            <button type="submit" class="btn btn-primario">Salvar produto</button>
+          </div>
+          <p class="ajuda texto-suave">Preço mínimo: camisas R$ 160 · chuteiras R$ 250. A grade de tamanhos é criada com saldo zero.</p>
+        </form>
+      </div>
+    </section>
+
+    <!-- BANCO -->
+    <section role="tabpanel" id="aba-banco" aria-labelledby="tab-banco" hidden>
+      <p class="texto-suave">Consultas somente-leitura pré-definidas sobre tabelas, views, procedures e triggers do SQL Server. Por segurança, o painel não executa SQL digitado.</p>
+      <div class="chips" id="lista-consultas" role="group" aria-label="Consultas disponíveis"></div>
+      <h2 class="subtitulo-admin" id="titulo-consulta"></h2>
+      <div class="tabela-rolagem painel"><table class="tabela" id="tabela-consulta"></table></div>
+    </section>
+
+    <section role="tabpanel" id="aba-avaliacoes" aria-labelledby="tab-avaliacoes" hidden>
+      <p class="texto-suave">Moderação das avaliações de clientes. Comentários com link, contato ou termo ofensivo chegam como <strong>Pendente</strong> e só aparecem na loja depois de publicados. Para ocultar, informe o motivo: fica registrado quem moderou e quando.</p>
+      <div class="filtro-linha">
+        <label for="filtro-avaliacoes">Situação</label>
+        <select id="filtro-avaliacoes" class="entrada">
+          <option value="">Todas</option>
+          <option value="Pendente" selected>Pendentes</option>
+          <option value="Publicada">Publicadas</option>
+          <option value="Oculta">Ocultas</option>
+        </select>
+      </div>
+      <div id="lista-moderacao" class="lista-moderacao" aria-live="polite"></div>
+    </section>
+
+    <section role="tabpanel" id="aba-acessos" aria-labelledby="tab-acessos" hidden>
+      <p class="texto-suave">Toda tentativa de login fica registrada (tabela LogAcessos). Cinco senhas erradas seguidas bloqueiam a conta por 15 minutos.</p>
+      <div class="kpis" id="kpis-acessos"></div>
+      <div class="tabela-rolagem painel">
+        <table class="tabela">
+          <thead><tr><th>Data</th><th>E-mail</th><th>IP</th><th>Resultado</th><th>Detalhe</th></tr></thead>
+          <tbody id="tabela-acessos"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/admin.js"></script>
+</body>
+</html>

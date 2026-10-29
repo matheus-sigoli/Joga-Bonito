@@ -1,0 +1,13 @@
+{
+  "tools": {
+    "sandbox": "docker"
+  },
+  "agents": {
+    "overrides": {
+      "maestro":   { "model": "gemini-2.5-pro", "max_turns": 50 },
+      "dev":       { "max_turns": 60, "timeout_mins": 40 },
+      "qa":        { "max_turns": 40, "timeout_mins": 25 },
+      "devops":    { "max_turns": 40, "timeout_mins": 30 }
+    }
+  }
+}

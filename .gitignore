@@ -1,0 +1,23 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+.env
+Mobile/.dart_tool/
+Mobile/build/
+Mobile/android/
+Mobile/ios/
+Mobile/web/
+Mobile/windows/
+Mobile/linux/
+Mobile/macos/
+Mobile/.flutter-plugins*
+Mobile/pubspec.lock
+publico/
+Site/IMG/Produtos/_originais/
+
+# Trabalho escrito, planilhas e PDFs do PIM: entregues só pelo sistema da UNIP
+# (manual do PIM, seção 7 — publicar o próprio trabalho conta como autoplágio)
+*.docx
+*.pdf
+*.xlsx

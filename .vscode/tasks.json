@@ -1,0 +1,84 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Joga Bonito: ligar a API ao abrir o projeto",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/Site/ferramentas/jogabonito.ps1",
+        "-Acao",
+        "Iniciar",
+        "-SemNavegador",
+        "-Silencioso"
+      ],
+      "windows": {
+        "command": "powershell"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Joga Bonito: abrir a loja",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/Site/ferramentas/jogabonito.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "compilar-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Site/backend/JogaBonito.Api.csproj",
+        "--nologo"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "desligar-api-do-lancador",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/Site/ferramentas/jogabonito.ps1",
+        "-Acao",
+        "Parar"
+      ],
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "preparar-depuracao",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "desligar-api-do-lancador",
+        "compilar-api"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

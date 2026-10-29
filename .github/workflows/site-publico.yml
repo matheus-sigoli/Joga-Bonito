@@ -1,0 +1,47 @@
+# ============================================================================
+# JOGA BONITO — site público no GitHub Pages
+#   A cada push na main: organiza as fotos de Site/IMG/Produtos/<id>/, gera o site
+#   estático (publico/, loja em modo demonstração) e publica em
+#   https://<usuario>.github.io/<repositorio>/  (abre direto na página inicial).
+#   Ative uma vez: Settings › Pages › Build and deployment › Source: GitHub Actions.
+# ============================================================================
+name: Site público
+
+on:
+  push:
+    branches: [main]
+    paths: ["Site/**", ".github/workflows/site-publico.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: site-publico
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Organizar fotos e catálogo
+        run: |
+          pip install --quiet pillow
+          python Site/ferramentas/gerar_catalogo.py
+      - name: Gerar o site público
+        run: python Site/ferramentas/publicar_estatico.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: publico
+      - id: deploy
+        uses: actions/deploy-pages@v4

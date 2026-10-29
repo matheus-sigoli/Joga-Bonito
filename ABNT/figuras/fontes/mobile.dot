@@ -1,0 +1,13 @@
+digraph M {
+  graph [rankdir=LR, fontname="Arial", nodesep=0.35, ranksep=0.5, pad=0.3, bgcolor=white];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, fillcolor="#E8F2EB", color="#0E552A"];
+  edge [color="#0E552A", fontname="Arial", fontsize=9];
+  s [label="Splash\n(restaura sessão,\ncarrinho e servidor)", fillcolor="#0E552A", fontcolor=white];
+  subgraph cluster_nav { label="Barra de navegação inferior"; style="rounded,dashed"; fontname="Arial Bold"; color="#999999";
+    l [label="Loja\ncategorias · filtros · busca"]; c [label="Carrinho"]; p [label="Pedidos\nlinha do tempo"]; pf [label="Perfil\nconta · servidor · sync"]; }
+  pr [label="Produto\ngaleria · tamanho · qtd"];
+  lg [label="Login / Cadastro\n(JWT)", fillcolor="#FFF6CC", color="#C9A000"];
+  ck [label="Checkout\nendereço · Pix/cartão · cupom"];
+  s -> l; l -> pr [label="abrir"]; pr -> c [label="adicionar"]; c -> lg [label="não logado"]; lg -> ck; c -> ck [label="logado"]; ck -> p [label="pedido criado"];
+  pf -> lg; p -> lg [style=dashed];
+}

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Testes de INTEGRAÇÃO: sobem a API .NET real (WebApplicationFactory) contra um
+    SQL Server de verdade, num banco temporário criado e apagado pelos próprios testes.
+    Defina a variável JB_TESTE_SQL com uma conexão que possa criar bancos, por exemplo:
+      JB_TESTE_SQL="Server=localhost,1433;User Id=sa;Password=...;TrustServerCertificate=True"
+    Sem a variável, os testes aparecem como "ignorados" (não falham).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="xunit" Version="2.7.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\backend\JogaBonito.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

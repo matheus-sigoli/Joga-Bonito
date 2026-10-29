@@ -1,0 +1,297 @@
+# ============================================================================
+# JOGA BONITO — Pipeline CI/CD (GitHub Actions)
+#   push/PR  → testes unitários (xUnit), integração (API real + SQL Server),
+#              front-end (JS + E2E Playwright) e app (Flutter) — TODOS obrigatórios
+#   main     → imagem Docker no GitHub Container Registry → migração do banco no
+#              Azure SQL → deploy no App Service → verificação de segurança publicada
+#
+# Implantação no Azure (job "deploy", só na main). Configure no GitHub, ambiente "producao":
+#   Variável  AZURE_RESOURCE_GROUP     grupo onde rodou infra/main.bicep (deployment "-n jogabonito")
+#   Segredos  AZURE_CLIENT_ID / AZURE_TENANT_ID / AZURE_SUBSCRIPTION_ID
+#                                      login OIDC (sem senha): app do Entra ID com credencial federada
+#                                      para este repositório + papel Contributor no grupo
+#             AZURE_SQL_ADMIN / AZURE_SQL_ADMIN_SENHA   conta administradora do Azure SQL (só a migração usa)
+#             AZURE_SQL_SENHA_APP      senha do jogabonito_app (a mesma passada ao Bicep em senhaApp)
+# Nome do App Service, servidor SQL e endereço da loja são lidos das saídas do Bicep — nada fixo aqui.
+# Passo a passo completo: infra/IMPLANTACAO.md
+# Variável DEPLOY_OBRIGATORIO=true faz o pipeline FALHAR se a configuração faltar
+# (em vez de só avisar que o deploy não foi feito).
+# ============================================================================
+name: CI-CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+# O nome da imagem precisa ser minúsculo (o Docker recusa "Matheus-Sigoli"): calculado em cada job
+
+jobs:
+  api:
+    name: API .NET 8 — build e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restaurar
+        run: dotnet restore Site/tests/JogaBonito.Tests/JogaBonito.Tests.csproj
+      - name: Testes unitários (xUnit)
+        run: dotnet test Site/tests/JogaBonito.Tests/JogaBonito.Tests.csproj --no-restore -c Release --logger "trx;LogFileName=resultado.trx"
+      - name: Publicar artefato
+        run: dotnet publish Site/backend/JogaBonito.Api.csproj -c Release -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: api-publicada
+          path: publish
+
+  web:
+    name: Front-end — sintaxe e testes E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verificar JavaScript
+        run: for f in Site/Javascript/*.js Site/tests/e2e/*.js; do node --check "$f"; done
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Testes ponta a ponta (Playwright + API simulada)
+        run: python Site/tests/e2e/test_loja.py
+      - name: Roteiro de aceitação contra a API simulada (o mesmo que roda contra a real)
+        run: |
+          node Site/tests/e2e/mock-api.js Site 5000 & sleep 2
+          python Site/tests/aceitacao/validar_loja.py http://localhost:5000
+
+  integracao:
+    name: Integração — API real + SQL Server 2022
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: CiTeste#2026Senha
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'CiTeste#2026Senha' -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 15 --health-start-period 20s
+    env:
+      JB_TESTE_SQL: "Server=localhost,1433;User Id=sa;Password=CiTeste#2026Senha;TrustServerCertificate=True;"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Testes de integração (cadastro, compra, estoque, concorrência, permissões, moderação, LGPD)
+        run: dotnet test Site/tests/JogaBonito.IntegrationTests/JogaBonito.IntegrationTests.csproj -c Release --logger "console;verbosity=normal"
+      - name: Aceitação — fluxo completo contra a API real (75 verificações)
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          Urls: http://localhost:5000
+          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=JogaBonitoDB;User Id=sa;Password=CiTeste#2026Senha;TrustServerCertificate=True;"
+        run: |
+          dotnet run --project Site/backend/JogaBonito.Api.csproj -c Release > api.log 2>&1 &
+          for _ in $(seq 1 60); do curl -fs http://localhost:5000/health/ready >/dev/null && break; sleep 3; done
+          python3 Site/tests/aceitacao/validar_loja.py http://localhost:5000 || { tail -60 api.log; exit 1; }
+      - name: Conferência do banco depois do fluxo (conferencia.sql)
+        run: |
+          docker run --rm --network host -v "$PWD/Site/banco:/banco:ro" mcr.microsoft.com/mssql-tools \
+            /opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P 'CiTeste#2026Senha' -d JogaBonitoDB -b -W -i /banco/conferencia.sql
+
+  mobile:
+    name: App Flutter — análise e testes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter create --project-name jogabonito_mobile --org br.unip.pim --platforms android .
+      - run: flutter pub get
+      - name: Preparar Android (HTTPS em produção, HTTP só na depuração)
+        run: dart run tool/preparar_android.dart
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - name: APK de produção apontando para a API publicada
+        env:
+          API_URL: ${{ vars.URL_LOJA }}
+        run: |
+          if [ -n "$API_URL" ]; then
+            flutter build apk --release --dart-define=API_URL="$API_URL"
+          else
+            echo "::warning::Variável URL_LOJA não definida: o APK usa o endereço de desenvolvimento (emulador)."
+            flutter build apk --release
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-android
+          path: Mobile/build/app/outputs/flutter-apk/app-release.apk
+
+  docker:
+    name: Imagem Docker → GHCR
+    needs: [api, web, mobile, integracao]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nome da imagem (minúsculo)
+        run: echo "IMAGEM=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/jogabonito-api" >> "$GITHUB_ENV"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ./Site
+          file: ./Site/backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGEM }}:latest
+            ${{ env.IMAGEM }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy — Azure SQL + App Service
+    needs: docker
+    runs-on: ubuntu-latest
+    environment: producao
+    permissions:
+      id-token: write      # login OIDC no Azure
+      contents: read
+    env:
+      GRUPO: ${{ vars.AZURE_RESOURCE_GROUP }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Nome da imagem (minúsculo)
+        run: echo "IMAGEM=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/jogabonito-api" >> "$GITHUB_ENV"
+
+      - name: Verificar configuração
+        id: segredos
+        run: |
+          faltam=""
+          [ -n "$GRUPO" ] || faltam="$faltam AZURE_RESOURCE_GROUP(variável)"
+          [ -n "${{ secrets.AZURE_CLIENT_ID }}" ] || faltam="$faltam AZURE_CLIENT_ID"
+          [ -n "${{ secrets.AZURE_TENANT_ID }}" ] || faltam="$faltam AZURE_TENANT_ID"
+          [ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ] || faltam="$faltam AZURE_SUBSCRIPTION_ID"
+          [ -n "${{ secrets.AZURE_SQL_ADMIN }}" ] || faltam="$faltam AZURE_SQL_ADMIN"
+          [ -n "${{ secrets.AZURE_SQL_ADMIN_SENHA }}" ] || faltam="$faltam AZURE_SQL_ADMIN_SENHA"
+          [ -n "${{ secrets.AZURE_SQL_SENHA_APP }}" ] || faltam="$faltam AZURE_SQL_SENHA_APP"
+          if [ -z "$faltam" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          echo "## Deploy NÃO realizado" >> "$GITHUB_STEP_SUMMARY"
+          echo "Falta configurar no ambiente producao:$faltam. A imagem foi publicada no GHCR, mas nada foi implantado. Veja infra/IMPLANTACAO.md." >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ vars.DEPLOY_OBRIGATORIO }}" = "true" ]; then
+            echo "::error::DEPLOY_OBRIGATORIO=true e falta configurar:$faltam"; exit 1
+          fi
+          echo "::warning::Deploy não realizado. Falta configurar:$faltam"
+
+      - name: Login no Azure (OIDC, sem senha)
+        if: steps.segredos.outputs.ok == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ler os nomes criados pelo Bicep
+        if: steps.segredos.outputs.ok == 'true'
+        id: infra
+        run: |
+          saidas=$(az deployment group show -g "$GRUPO" -n jogabonito --query properties.outputs -o json) || {
+            echo "::error::Deployment 'jogabonito' não encontrado em $GRUPO. Rode infra/main.bicep com -n jogabonito (infra/IMPLANTACAO.md)."; exit 1; }
+          for chave in nomeApp nomeServidorSql servidorSql enderecoLoja nomeBanco; do
+            echo "$chave=$(echo "$saidas" | jq -r ".$chave.value")" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: Conferir se o App Service consegue baixar a imagem
+        if: steps.segredos.outputs.ok == 'true'
+        run: |
+          docker logout ghcr.io >/dev/null 2>&1 || true
+          if docker manifest inspect "$IMAGEM:${{ github.sha }}" >/dev/null 2>&1; then
+            echo "Pacote público no GHCR: download anônimo funciona."
+          elif az webapp config appsettings list -g "$GRUPO" -n "${{ steps.infra.outputs.nomeApp }}" \
+                 --query "[?name=='DOCKER_REGISTRY_SERVER_USERNAME'].value" -o tsv | grep -q .; then
+            echo "Pacote privado, App Service com credencial do GHCR (Key Vault)."
+          else
+            echo "::error::A imagem é privada e o App Service não tem credencial. Torne o pacote público (GitHub › Packages › jogabonito-api › Package settings) ou rode o Bicep com ghcrUsuario/ghcrToken."
+            exit 1
+          fi
+
+      - name: Abrir o firewall do SQL só para este runner
+        if: steps.segredos.outputs.ok == 'true'
+        run: |
+          IP=$(curl -fsS https://api.ipify.org)
+          az sql server firewall-rule create -g "$GRUPO" -s "${{ steps.infra.outputs.nomeServidorSql }}" \
+            -n "pipeline-${{ github.run_id }}" --start-ip-address "$IP" --end-ip-address "$IP" -o none
+
+      - name: Migrar banco (schema, catálogo incremental e usuário de privilégio mínimo)
+        if: steps.segredos.outputs.ok == 'true'
+        env:
+          SQLCMDSERVER: ${{ steps.infra.outputs.servidorSql }}
+          SQLCMDDBNAME: ${{ steps.infra.outputs.nomeBanco }}
+          SQLCMDUSER: ${{ secrets.AZURE_SQL_ADMIN }}
+          SQLCMDPASSWORD: ${{ secrets.AZURE_SQL_ADMIN_SENHA }}
+        run: |
+          rodar() { docker run --rm -e SQLCMDSERVER -e SQLCMDDBNAME -e SQLCMDUSER -e SQLCMDPASSWORD \
+                      -v "$PWD/Site/banco:/banco:ro" mcr.microsoft.com/mssql-tools \
+                      /opt/mssql-tools/bin/sqlcmd -N -b -l 60 "$@"; }
+          # Banco serverless pausado leva até ~1 min para acordar: espera antes de migrar
+          for t in 1 2 3 4 5 6; do rodar -Q "SELECT 1" >/dev/null && break; echo "Banco acordando ($t/6)..."; sleep 20; done
+          rodar -i /banco/schema.sql
+          rodar -i /banco/seed.sql
+          rodar -i /banco/seguranca-azure.sql -v SENHA_APP="${{ secrets.AZURE_SQL_SENHA_APP }}"
+
+      - name: Fechar o firewall do runner
+        if: always() && steps.segredos.outputs.ok == 'true' && steps.infra.outputs.nomeServidorSql != ''
+        run: |
+          az sql server firewall-rule delete -g "$GRUPO" -s "${{ steps.infra.outputs.nomeServidorSql }}" \
+            -n "pipeline-${{ github.run_id }}" -o none || true
+
+      - name: Implantar a imagem desta versão
+        if: steps.segredos.outputs.ok == 'true'
+        run: |
+          az webapp config container set -g "$GRUPO" -n "${{ steps.infra.outputs.nomeApp }}" \
+            --container-image-name "$IMAGEM:${{ github.sha }}" --container-registry-url https://ghcr.io -o none
+          az webapp restart -g "$GRUPO" -n "${{ steps.infra.outputs.nomeApp }}"
+
+      - name: Conferir segredos do Key Vault (todos "Resolved")
+        if: steps.segredos.outputs.ok == 'true'
+        run: |
+          id=$(az webapp show -g "$GRUPO" -n "${{ steps.infra.outputs.nomeApp }}" --query id -o tsv)
+          for tentativa in 1 2 3 4 5 6; do
+            pendentes=$(az rest --method get --url "https://management.azure.com$id/config/configreferences/appsettings?api-version=2022-03-01" \
+              --query "value[?properties.status!='Resolved'].name" -o tsv)
+            [ -z "$pendentes" ] && { echo "Todas as referências do Key Vault resolvidas."; exit 0; }
+            echo "Ainda não resolvidas: $pendentes (tentativa $tentativa/6)"; sleep 20
+          done
+          echo "::error::Referências do Key Vault sem resolver: $pendentes. Confira o papel 'Key Vault Secrets User' da identidade do App Service."
+          exit 1
+
+      - name: Teste de fumaça (/health/ready = API + esquema + catálogo)
+        if: steps.segredos.outputs.ok == 'true'
+        run: curl --fail --retry 12 --retry-delay 15 --retry-all-errors "${{ steps.infra.outputs.enderecoLoja }}/health/ready"
+
+      - name: Verificar HTTPS, cabeçalhos, CORS, Swagger e contas de demonstração
+        if: steps.segredos.outputs.ok == 'true'
+        run: python3 Site/ferramentas/verificar_publicacao.py "${{ steps.infra.outputs.enderecoLoja }}"
+
+      - name: Resumo
+        if: steps.segredos.outputs.ok == 'true'
+        run: |
+          echo "## Loja publicada" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.infra.outputs.enderecoLoja }} — imagem \`$IMAGEM:${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"

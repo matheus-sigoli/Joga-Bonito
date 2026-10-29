@@ -1,0 +1,19 @@
+digraph N {
+  graph [rankdir=LR, fontname="Arial", nodesep=0.35, ranksep=0.55, pad=0.3, bgcolor=white];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, fillcolor="#E8F2EB", color="#0E552A"];
+  edge [color="#0E552A", fontname="Arial", fontsize=9];
+  u [label="Clientes\n(navegador / app)", shape=ellipse, fillcolor="#FFF6CC", color="#C9A000"];
+  acr [label="GitHub Container Registry\n(imagem jogabonito-api)", fillcolor="#EEEEEE", color="#555555"];
+  gh [label="GitHub\n(código + Actions)", fillcolor="#EEEEEE", color="#555555"];
+  subgraph cluster_az { label="Microsoft Azure — região Brazil South"; fontname="Arial Bold"; style=rounded; color="#0078D4";
+    fd [label="Azure Front Door\nCDN · HTTPS · WAF"];
+    subgraph cluster_app { label="App Service Plan (Linux, P1v3) — autoescala 1→4"; style="rounded,dashed"; color="#0078D4";
+      a1 [label="Container API\ninstância 1"]; a2 [label="Container API\ninstância N"]; }
+    sql [label="Azure SQL Database\n(General Purpose, backup\nautomático, geo-réplica)", shape=cylinder, fillcolor="#0E552A", fontcolor=white];
+    kv [label="Key Vault\n(chave JWT, connection string)"];
+    blob [label="Blob Storage\n(fotos dos produtos)"];
+    mon [label="Application Insights\n+ Azure Monitor (alertas)"];
+  }
+  u -> fd -> a1; fd -> a2; a1 -> sql; a2 -> sql; a1 -> kv [style=dashed]; a1 -> mon [style=dashed]; fd -> blob [label="/IMG"];
+  gh -> acr [label="CI: build + testes"]; acr -> a1 [label="CD: deploy", style=dashed];
+}

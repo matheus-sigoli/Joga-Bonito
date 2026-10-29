@@ -1,0 +1,51 @@
+# ============================================================================
+# JOGA BONITO — ambiente completo em containers
+#   docker compose up -d --build
+#   Loja:     http://localhost:5000
+#   Swagger:  http://localhost:5000/swagger
+# ============================================================================
+services:
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: jogabonito_sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?Crie o arquivo .env com gerar-env.ps1 (Windows) ou gerar-env.sh}
+    ports:
+      - "127.0.0.1:1433:1433"   # banco acessível só deste computador (SSMS), nunca pela rede
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./Site
+      dockerfile: backend/Dockerfile
+    container_name: jogabonito_api
+    ports:
+      - "5000:5000"
+    environment:
+      # Ambiente LOCAL de demonstração (Development): cria o banco, carrega as contas de teste
+      # e conecta como sa dentro da rede do Docker. Produção (Azure) é configurada pelas
+      # variáveis do App Service — ver README › Produção. A API se recusa a subir em produção
+      # com chave JWT de exemplo ou conectada como sa.
+      ConnectionStrings__DefaultConnection: "Server=db;Database=JogaBonitoDB;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      ASPNETCORE_ENVIRONMENT: Development
+      Jwt__Chave: ${JWT_CHAVE:?Crie o arquivo .env com gerar-env.ps1 (Windows) ou gerar-env.sh}
+      # Chave AES-256 dos endereços cifrados: precisa ser sempre a mesma (fica no .env)
+      Dados__ChaveCriptografia: ${DADOS_CHAVE:?Rode gerar-env.ps1 (Windows) ou gerar-env.sh de novo para criar DADOS_CHAVE}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:

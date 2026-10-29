@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho — Joga Bonito</title>
+  <meta name="description" content="Revise seus itens, aplique cupom e finalize com Pix ou cartão.">
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container carrinho-pagina">
+    <h1 class="titulo-secao">Seu carrinho</h1>
+
+    <div class="carrinho-layout" id="carrinho-layout">
+      <section aria-label="Itens do carrinho">
+        <div id="itens"></div>
+      </section>
+
+      <aside class="resumo painel" id="resumo" aria-label="Resumo do pedido">
+        <h2>Resumo</h2>
+
+        <div class="frete-barra" id="frete-barra">
+          <p id="frete-texto"></p>
+          <div class="barra"><i id="frete-progresso"></i></div>
+        </div>
+
+        <form class="cupom" id="form-cupom">
+          <label for="cupom" class="sr-only">Cupom de desconto</label>
+          <input id="cupom" class="entrada" placeholder="Cupom de desconto" autocomplete="off" maxlength="30">
+          <button class="btn btn-contorno btn-pequeno" type="submit">Aplicar</button>
+        </form>
+        <p class="ajuda texto-suave" id="cupom-msg" aria-live="polite"></p>
+
+        <dl class="valores">
+          <div><dt>Subtotal</dt><dd id="v-subtotal">R$ 0,00</dd></div>
+          <div id="linha-desconto" hidden><dt>Desconto</dt><dd id="v-desconto" class="positivo"></dd></div>
+          <div><dt>Frete</dt><dd id="v-frete"></dd></div>
+          <div class="total"><dt>Total</dt><dd id="v-total">R$ 0,00</dd></div>
+        </dl>
+        <p class="ajuda texto-suave" id="v-parcelas"></p>
+        <p class="ajuda joga-junto" id="v-joga-junto" hidden></p>
+
+        <div id="aviso-carrinho" class="aviso" hidden></div>
+        <button class="btn btn-primario btn-bloco" id="btn-finalizar">Finalizar compra</button>
+        <a href="catalogo.html" class="btn btn-contorno btn-bloco" style="margin-top:10px">Continuar comprando</a>
+      </aside>
+    </div>
+  </main>
+
+  <!-- =================== CHECKOUT =================== -->
+  <dialog class="modal checkout" id="checkout" aria-labelledby="checkout-titulo">
+    <div class="modal-caixa">
+      <div class="modal-topo">
+        <h2 id="checkout-titulo">Finalizar compra</h2>
+        <button class="modal-fechar" aria-label="Fechar" id="fechar-checkout">✕</button>
+      </div>
+
+      <ol class="etapas" aria-label="Etapas">
+        <li data-etapa="1" class="ativa">Entrega</li>
+        <li data-etapa="2">Pagamento</li>
+        <li data-etapa="3">Confirmação</li>
+      </ol>
+
+      <!-- ETAPA 1: ENDEREÇO -->
+      <form id="etapa-1" class="etapa" novalidate>
+        <div class="linha-campos">
+          <div class="campo">
+            <label for="cep">CEP</label>
+            <input id="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" required placeholder="00000-000">
+            <span class="erro-campo" id="cep-msg"></span>
+          </div>
+          <div class="campo">
+            <label for="numero">Número</label>
+            <input id="numero" autocomplete="address-line2" required maxlength="20">
+          </div>
+        </div>
+        <div class="campo">
+          <label for="rua">Rua</label>
+          <input id="rua" autocomplete="address-line1" required maxlength="150">
+        </div>
+        <div class="campo">
+          <label for="complemento">Complemento (opcional)</label>
+          <input id="complemento" maxlength="60">
+        </div>
+        <div class="linha-campos">
+          <div class="campo"><label for="bairro">Bairro</label><input id="bairro" required maxlength="100"></div>
+          <div class="campo"><label for="cidade">Cidade</label><input id="cidade" autocomplete="address-level2" required maxlength="100"></div>
+          <div class="campo"><label for="uf">UF</label><input id="uf" autocomplete="address-level1" required maxlength="2" placeholder="SP"></div>
+        </div>
+        <div id="aviso-etapa-1" class="aviso" hidden></div>
+        <button class="btn btn-primario btn-bloco" type="submit">Continuar para pagamento</button>
+      </form>
+
+      <!-- ETAPA 2: PAGAMENTO -->
+      <div id="etapa-2" class="etapa" hidden>
+        <p class="aviso aviso-info aviso-simulado" role="note"><strong>Pagamento simulado.</strong> Este é um projeto acadêmico (PIM IV): nenhum valor é cobrado, o QR Code não é um Pix real e os dados do cartão não são enviados nem armazenados.</p>
+        <div class="metodos" role="radiogroup" aria-label="Forma de pagamento">
+          <button type="button" class="metodo" data-metodo="PIX" role="radio" aria-checked="true">Pix<small>Aprovação imediata</small></button>
+          <button type="button" class="metodo" data-metodo="Cartão de Crédito" role="radio" aria-checked="false">Crédito<small>Até 6x sem juros</small></button>
+          <button type="button" class="metodo" data-metodo="Cartão de Débito" role="radio" aria-checked="false">Débito<small>À vista</small></button>
+        </div>
+
+        <div id="pag-pix" class="pag-bloco">
+          <div class="pix">
+            <img src="../IMG/QR CODE.png" alt="QR Code para pagamento via Pix" width="180" height="180">
+            <div>
+              <p>QR Code de demonstração — em uma loja real, você o leria no app do banco:</p>
+              <div class="copia">
+                <input class="entrada" id="pix-codigo" aria-label="Código Pix copia e cola (demonstração)" readonly value="00020126580014BR.GOV.BCB.PIX0136jogabonito@pix.com.br5204000053039865802BR5913JOGA BONITO6009SAO PAULO">
+                <button type="button" class="btn btn-contorno btn-pequeno" id="copiar-pix">Copiar</button>
+              </div>
+              <p class="texto-suave">O código expira em <strong id="pix-timer">15:00</strong>.</p>
+            </div>
+          </div>
+        </div>
+
+        <form id="pag-cartao" class="pag-bloco" hidden novalidate autocomplete="off">
+          <div class="campo">
+            <label for="cartao-numero">Número do cartão</label>
+            <input id="cartao-numero" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" autocomplete="cc-number">
+            <span class="erro-campo" id="erro-cartao-numero"></span>
+          </div>
+          <div class="campo">
+            <label for="cartao-nome">Nome impresso no cartão</label>
+            <input id="cartao-nome" maxlength="26" autocomplete="cc-name">
+            <span class="erro-campo" id="erro-cartao-nome"></span>
+          </div>
+          <div class="linha-campos">
+            <div class="campo">
+              <label for="cartao-validade">Validade</label>
+              <input id="cartao-validade" inputmode="numeric" maxlength="5" placeholder="MM/AA" autocomplete="cc-exp">
+              <span class="erro-campo" id="erro-cartao-validade"></span>
+            </div>
+            <div class="campo">
+              <label for="cartao-cvv">CVV</label>
+              <input id="cartao-cvv" inputmode="numeric" maxlength="4" placeholder="123" autocomplete="cc-csc">
+              <span class="erro-campo" id="erro-cartao-cvv"></span>
+            </div>
+          </div>
+          <div class="campo" id="campo-parcelas">
+            <label for="parcelas">Parcelamento</label>
+            <select id="parcelas"></select>
+          </div>
+        </form>
+
+        <dl class="valores valores-checkout">
+          <div class="total"><dt>Total a pagar</dt><dd id="checkout-total"></dd></div>
+        </dl>
+        <div id="aviso-etapa-2" class="aviso" hidden></div>
+        <div class="botoes-etapa">
+          <button type="button" class="btn btn-contorno" id="voltar-etapa-1">Voltar</button>
+          <button type="button" class="btn btn-primario" id="confirmar-pagamento">Confirmar pagamento</button>
+        </div>
+      </div>
+
+      <!-- ETAPA 3: SUCESSO -->
+      <div id="etapa-3" class="etapa sucesso" hidden>
+        <div class="icone-sucesso" aria-hidden="true">Gol!</div>
+        <h3>Pedido confirmado!</h3>
+        <p>Pedido <strong id="sucesso-numero"></strong> · <span id="sucesso-pagamento"></span></p>
+        <p>Código de rastreio: <strong id="sucesso-rastreio"></strong></p>
+        <p class="joga-junto" id="sucesso-joga-junto"></p>
+        <p class="texto-suave">Pagamento simulado: nenhuma cobrança foi feita.</p>
+        <p class="texto-suave">Você vai acompanhar cada etapa em “Meus pedidos”.</p>
+        <a href="pedidos.html" class="btn btn-primario btn-bloco">Ver meus pedidos</a>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/carrinho.js"></script>
+</body>
+</html>

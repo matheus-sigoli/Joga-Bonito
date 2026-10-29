@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "JogaBonito.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "HTML/login.html",
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "JogaBonito.Api (rede local - celular)": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "HTML/login.html",
+      "applicationUrl": "http://0.0.0.0:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+digraph MER {
+  graph [rankdir=LR, fontname="Arial", nodesep=0.5, ranksep=0.9, bgcolor="white", pad=0.3];
+  node [shape=plain, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=9, color="#0E552A", arrowhead=crow, arrowtail=tee, dir=both];
+  Usuarios [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Usuarios</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/>Nome<br align="left"/>Email (UQ)<br align="left"/>SenhaHash<br align="left"/>Role · Ativo<br align="left"/>AceiteLgpdEm<br align="left"/>TentativasFalhas · BloqueadoAte<br align="left"/>VersaoToken<br align="left"/></td></tr></table>>];
+  Enderecos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Enderecos</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> UsuarioId<br align="left"/>Cep · Rua · Numero<br align="left"/>Bairro · Cidade · Estado<br align="left"/></td></tr></table>>];
+  Categorias [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Categorias</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/>Nome (UQ) · Slug (UQ)<br align="left"/>Descricao · Ativo<br align="left"/></td></tr></table>>];
+  Produtos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Produtos</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> CategoriaId<br align="left"/>Nome · Modelo · Linha<br align="left"/>Equipe · Ano · Marca · Solado<br align="left"/>Descricao<br align="left"/>Preco · PrecoPromocional<br align="left"/>Imagem · Destaque · Ativo<br align="left"/></td></tr></table>>];
+  ProdutoImagens [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>ProdutoImagens</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> ProdutoId<br align="left"/>Url · Ordem<br align="left"/></td></tr></table>>];
+  Estoque [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Estoque</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> ProdutoId<br align="left"/>Tamanho (UQ c/ ProdutoId)<br align="left"/>Quantidade ≥ 0<br align="left"/></td></tr></table>>];
+  Cupons [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Cupons</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/>Codigo (UQ)<br align="left"/>PercentualDesconto<br align="left"/>ValorMinimo · ValidoAte<br align="left"/></td></tr></table>>];
+  Pedidos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#FCCA0F"><b>Pedidos</b></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> UsuarioId · EnderecoId · CupomId<br align="left"/>DataPedido · Subtotal · Desconto<br align="left"/>Frete · ValorTotal · ValorJogaJunto<br align="left"/>StatusPedido<br align="left"/>FormaPagamento · Parcelas<br align="left"/>CodigoRastreio · Origem<br align="left"/></td></tr></table>>];
+  ItensPedido [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#FCCA0F"><b>ItensPedido</b></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> PedidoId · ProdutoId<br align="left"/>Tamanho · Quantidade<br align="left"/>PrecoUnitario<br align="left"/></td></tr></table>>];
+  Historico [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#666666"><font color="white"><b>HistoricoStatusPedido</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> PedidoId<br align="left"/>StatusAnterior · StatusNovo<br align="left"/>DataAlteracao<br align="left"/></td></tr></table>>];
+  Auditoria [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#666666"><font color="white"><b>AuditoriaEstoque</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/>ProdutoId · Tamanho<br align="left"/>QtdAnterior · QtdNova<br align="left"/>OrigemOperacao · Data<br align="left"/></td></tr></table>>];
+  Avaliacoes [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>Avaliacoes</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> ProdutoId · UsuarioId · ModeradoPor<br align="left"/>Nota (1–5) · Comentario<br align="left"/>Status · ModeradoEm · Motivo<br align="left"/></td></tr></table>>];
+  LogAcessos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td bgcolor="#0E552A"><font color="white"><b>LogAcessos</b></font></td></tr><tr><td align="left"><b>PK</b> Id<br align="left"/><b>FK</b> UsuarioId (opcional)<br align="left"/>Email · Ip · Sucesso<br align="left"/>Detalhe · Data<br align="left"/></td></tr></table>>];
+  Usuarios -> LogAcessos [label="1:N"];
+  Usuarios -> Enderecos [label="1:N"];
+  Usuarios -> Pedidos [label="1:N"];
+  Usuarios -> Avaliacoes [label="1:N"];
+  Enderecos -> Pedidos [label="1:N"];
+  Cupons -> Pedidos [label="1:N"];
+  Categorias -> Produtos [label="1:N"];
+  Produtos -> ProdutoImagens [label="1:N"];
+  Produtos -> Estoque [label="1:N (tamanhos)"];
+  Produtos -> ItensPedido [label="1:N"];
+  Produtos -> Avaliacoes [label="1:N"];
+  Pedidos -> ItensPedido [label="1:N"];
+  Pedidos -> Historico [label="1:N"];
+  Estoque -> Auditoria [label="trigger", style=dashed, arrowhead=normal, arrowtail=none, color="#666666"];
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joga Bonito Store</title>
+  <meta name="description" content="Camisas da Temporada 2026, clássicos retrô e chuteiras de campo, society e futsal. Frete grátis acima de R$ 299, troca em 30 dias, Pix e até 6x sem juros.">
+  <meta name="theme-color" content="#0E552A">
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="image" href="../IMG/Produtos/1/1.jpg">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body class="pagina-inicial">
+  <div id="cabecalho"></div>
+
+  <main id="conteudo">
+
+    <!-- ============================ HERO ============================ -->
+    <section class="hero" aria-labelledby="titulo-hero">
+      <div class="hero-grade">
+        <div class="hero-texto">
+          <h1 id="titulo-hero" class="revelar">Camisas e chuteiras de futebol</h1>
+          <p class="lead revelar" style="--atraso:90ms">Temporada 2026, clássicos retrô e chuteiras para campo, society e futsal. Cada peça é conferida antes de sair do estoque.</p>
+          <div class="hero-acoes revelar" style="--atraso:180ms">
+            <a href="catalogo.html?categoria=temporada-2026" class="btn btn-primario">Ver a Temporada 2026</a>
+            <button type="button" class="link-botao link-claro" data-guia="camisa">Descobrir meu tamanho</button>
+          </div>
+          <ul class="hero-promessas revelar" style="--atraso:270ms" aria-label="Vantagens">
+            <li><strong>Frete grátis</strong> acima de R$ 299</li>
+            <li><strong>Troca grátis</strong> em 30 dias</li>
+            <li><strong>6x sem juros</strong> ou Pix na hora</li>
+          </ul>
+        </div>
+        <figure class="hero-foto">
+          <a href="Produtos.html?id=1" class="hero-foto-link">
+            <img src="../IMG/Produtos/1/1.jpg" alt="Camisa amarela da Seleção Brasileira 2026, com gola verde e escudo bordado" width="1142" height="1070" fetchpriority="high">
+          </a>
+          <figcaption><a href="Produtos.html?id=1">Camisa Brasil 2026 Home</a> <span class="num">R$ 349,90</span></figcaption>
+        </figure>
+        <span class="hero-numero" aria-hidden="true">26</span>
+      </div>
+    </section>
+
+    <div id="aviso-offline-area"></div>
+
+    <!-- ===================== AS TRÊS LINHAS ===================== -->
+    <section class="linhas" aria-labelledby="titulo-linhas">
+      <div class="container linhas-topo">
+        <h2 id="titulo-linhas" class="titulo-secao revelar">Três jeitos de vestir o jogo</h2>
+        <p class="lead texto-suave revelar" style="--atraso:90ms">Do manto que sai do vestiário hoje à camisa que você viu levantar a taça, e a chuteira certa para o chão onde você joga.</p>
+      </div>
+      <div class="linhas-grade">
+        <a class="linha linha-temporada revelar" href="catalogo.html?categoria=temporada-2026">
+          <img src="../IMG/Jogadores/mbappe.jpg" alt="Mbappé comemorando gol com a camisa branca do Real Madrid" width="1600" height="900" loading="lazy" class="foto-jogador" style="--foco:58% 30%">
+          <span class="linha-numero" aria-hidden="true">26</span>
+          <span class="linha-texto">
+            <span class="linha-nome">Temporada 2026</span>
+            <span class="linha-desc">Clubes e seleções da nova temporada</span>
+          </span>
+        </a>
+        <a class="linha linha-retro revelar" style="--atraso:80ms" href="catalogo.html?categoria=retro">
+          <img src="../IMG/Jogadores/cr7-2008.jpg" alt="Cristiano Ronaldo com a camisa vermelha do Manchester United em 2008" width="1600" height="1303" loading="lazy" class="foto-jogador" style="--foco:52% 25%">
+          <span class="linha-numero" aria-hidden="true">07</span>
+          <span class="linha-texto">
+            <span class="linha-nome">Camisas Retrô</span>
+            <span class="linha-desc">Copas, finais e craques que viraram história</span>
+          </span>
+        </a>
+        <a class="linha linha-chuteiras revelar" style="--atraso:160ms" href="catalogo.html?categoria=chuteiras">
+          <svg class="sola sola-grande" viewBox="0 0 120 300" aria-hidden="true"><use href="#sola-society"/></svg>
+          <span class="linha-numero" aria-hidden="true">3</span>
+          <span class="linha-texto">
+            <span class="linha-nome">Chuteiras</span>
+            <span class="linha-desc">Campo, society e futsal</span>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===================== TEMPORADA 2026 ===================== -->
+    <section class="container vitrine vitrine-3" id="temporada-2026" aria-labelledby="titulo-temporada">
+      <div class="vitrine-topo">
+        <h2 id="titulo-temporada" class="titulo-secao revelar">Temporada 2026</h2>
+        <div class="piso-escolha alternador revelar" role="tablist" aria-label="Seleções ou clubes" data-alvo="grade-temporada">
+          <button role="tab" id="aba-selecoes" aria-controls="grade-temporada" aria-selected="true" data-linha="Seleção">Seleções</button>
+          <button role="tab" id="aba-clubes" aria-controls="grade-temporada" aria-selected="false" data-linha="Clube" tabindex="-1">Clubes</button>
+        </div>
+      </div>
+      <div class="grade-produtos" id="grade-temporada" role="tabpanel" aria-labelledby="aba-selecoes"
+           data-categoria="temporada-2026" data-linha="Seleção" data-limite="6"></div>
+      <p class="vitrine-rodape"><a href="catalogo.html?categoria=temporada-2026" class="btn btn-contorno btn-pequeno">Ver as 12 camisas da temporada</a></p>
+    </section>
+
+    <!-- ===================== VESTIU O CRAQUE ===================== -->
+    <section class="craques" id="craques" aria-labelledby="titulo-craques">
+      <div class="container">
+        <div class="craques-topo">
+          <h2 id="titulo-craques" class="titulo-secao revelar">Craques que vestiram o manto</h2>
+          <p class="lead revelar" style="--atraso:90ms">Romário no tetra, Kaká em Atenas, Cristiano em Moscou, Mbappé no Bernabéu e Lamine Yamal no novo Camp Nou. Conheça as histórias e vista a mesma camisa.</p>
+        </div>
+        <div class="craques-grade" id="craques-lista" aria-label="Craques"></div>
+        <p class="vitrine-rodape"><a href="craques.html" class="btn btn-primario">Ver a história de cada craque</a></p>
+      </div>
+    </section>
+
+    <!-- ======================= RETRÔ ======================= -->
+    <section class="retro" id="camisas-retro" aria-labelledby="titulo-retro">
+      <div class="container retro-grade">
+        <div class="retro-texto">
+          <p class="retro-ano" aria-hidden="true">94</p>
+          <h2 id="titulo-retro" class="titulo-secao revelar">A camisa que virou história</h2>
+          <p class="lead revelar" style="--atraso:90ms">A amarelinha do tetra em 94, a Viola roxa de 98/99, o Santos tricampeão da América em 2011 e o Manchester United campeão europeu em Moscou. Reedições com o corte da época, para vestir ou guardar.</p>
+          <a href="catalogo.html?categoria=retro" class="btn btn-primario revelar" style="--atraso:180ms">Ver a Coleção Retrô</a>
+        </div>
+        <div class="grade-produtos grade-retro" data-categoria="retro" data-limite="6"></div>
+      </div>
+    </section>
+
+    <!-- ================ QUAL CHUTEIRA (interativo) ================ -->
+    <section class="container chuteiras" id="chuteiras" aria-labelledby="titulo-chuteiras">
+      <h2 id="titulo-chuteiras" class="titulo-secao revelar">Qual chuteira é a sua?</h2>
+      <p class="lead texto-suave revelar" style="--atraso:90ms">Escolha o chão onde você joga. A sola certa dá tração, protege o joelho e dura mais.</p>
+
+      <div class="piso-escolha revelar" role="tablist" aria-label="Onde você joga">
+        <button role="tab" id="aba-campo" aria-controls="painel-piso" aria-selected="true" data-linha="Campo">Campo</button>
+        <button role="tab" id="aba-society" aria-controls="painel-piso" aria-selected="false" data-linha="Society">Society</button>
+        <button role="tab" id="aba-futsal" aria-controls="painel-piso" aria-selected="false" data-linha="Futsal">Futsal</button>
+      </div>
+
+      <div class="piso-painel" id="painel-piso" role="tabpanel" aria-live="polite">
+        <figure class="piso-sola">
+          <svg class="sola" id="sola-atual" viewBox="0 0 120 300" role="img" aria-labelledby="sola-legenda"><use href="#sola-campo"/></svg>
+          <figcaption id="sola-legenda">Sola de campo: travas altas e cônicas</figcaption>
+        </figure>
+        <div class="piso-info">
+          <h3 id="piso-nome">Campo</h3>
+          <dl class="piso-ficha">
+            <div><dt>Onde</dt><dd id="piso-onde">Grama natural</dd></div>
+            <div><dt>Travas</dt><dd id="piso-travas">Altas, cônicas ou em lâmina, que entram no gramado</dd></div>
+            <div><dt>Evite</dt><dd id="piso-evite">Grama sintética e quadra: a trava alta prende e força o joelho</dd></div>
+          </dl>
+          <div class="grade-produtos grade-piso" id="grade-piso"></div>
+          <a class="btn btn-contorno btn-pequeno" id="piso-link" href="catalogo.html?categoria=chuteiras&linha=Campo">Ver todas de campo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== QUALIDADE ===================== -->
+    <section class="qualidade" id="sobre" aria-labelledby="titulo-qualidade">
+      <figure class="qualidade-foto">
+        <img src="../IMG/Produtos/1/3.jpg" alt="Detalhe do escudo bordado e da gola da camisa do Brasil" width="800" height="800" loading="lazy">
+      </figure>
+      <div class="qualidade-texto">
+        <h2 id="titulo-qualidade" class="titulo-secao revelar">Conferida antes de sair</h2>
+        <p class="lead revelar" style="--atraso:90ms">A Joga Bonito começou vendendo camisas pelo Instagram. O cuidado de abrir caixa por caixa continua: nenhuma peça sai sem passar por esta conferência.</p>
+        <ul class="conferencia">
+          <li class="revelar" style="--atraso:120ms"><strong>Escudo e patches</strong> bordados sem fio solto</li>
+          <li class="revelar" style="--atraso:190ms"><strong>Costuras</strong> de gola, punho e barra alinhadas</li>
+          <li class="revelar" style="--atraso:260ms"><strong>Tamanho</strong> medido contra o nosso guia</li>
+          <li class="revelar" style="--atraso:330ms"><strong>Etiqueta e embalagem</strong> lacradas com o número do pedido</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===================== INCLUSÃO ===================== -->
+    <section class="container inclusao" aria-labelledby="titulo-inclusao">
+      <h2 id="titulo-inclusao" class="titulo-secao revelar">O futebol é de todo mundo</h2>
+      <dl class="inclusao-lista">
+        <div class="revelar"><dt>Libras no site inteiro</dt><dd>O botão do VLibras traduz qualquer página para Língua Brasileira de Sinais.</dd></div>
+        <div class="revelar" style="--atraso:70ms"><dt>Letra maior e alto contraste</dt><dd>Os botões A−, A+ e de contraste, no topo de toda página, ajustam a leitura e ficam salvos para a próxima visita.</dd></div>
+        <div class="revelar" style="--atraso:140ms"><dt>Respeito em campo</dt><dd>Campanhas com torcedores de todas as origens, corpos e gêneros. Discriminação aqui é cartão vermelho.</dd></div>
+        <div class="revelar" style="--atraso:210ms"><dt>Joga Junto</dt><dd>1% de cada pedido vai para escolinhas de futebol em comunidades. O valor fica registrado em cada compra.</dd></div>
+      </dl>
+    </section>
+
+    <!-- ========================= FAQ ========================= -->
+    <section class="container faq" id="duvidas" aria-labelledby="titulo-faq">
+      <h2 id="titulo-faq" class="titulo-secao revelar">Antes de comprar</h2>
+      <div class="faq-lista">
+        <details>
+          <summary>A camisa é original?</summary>
+          <p>Trabalhamos com camisas oficiais e com reedições retrô licenciadas. Cada peça é inspecionada antes do envio e acompanha nota fiscal.</p>
+        </details>
+        <details>
+          <summary>E se o tamanho não servir?</summary>
+          <p>A primeira troca de tamanho é grátis em até 30 dias após o recebimento. Antes de comprar, confira o <button type="button" class="link-botao" data-guia="camisa">guia de medidas</button>.</p>
+        </details>
+        <details>
+          <summary>Quanto tempo demora para chegar?</summary>
+          <p>Pedidos pagos até as 14h saem no mesmo dia útil. Capitais do Sudeste recebem em 2 a 4 dias úteis; demais regiões, de 4 a 9. O código de rastreio aparece em “Meus pedidos”.</p>
+        </details>
+        <details>
+          <summary>Como sei qual chuteira comprar?</summary>
+          <p>Pelo chão onde você joga: campo (grama natural), society (grama sintética) ou futsal (quadra). Use o <a href="#chuteiras">seletor de chuteiras</a> acima.</p>
+        </details>
+        <details>
+          <summary>Quais são as formas de pagamento?</summary>
+          <p>Pix com aprovação imediata, cartão de crédito em até 6x sem juros e cartão de débito.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Desenhos das solas (usados pelo seletor e pelo bloco de chuteiras) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <path id="contorno-sola" d="M60 6c30 0 50 26 52 70 2 40-6 70-8 104-2 30 6 54 2 80-4 24-22 34-46 34S18 284 14 260c-4-26 4-50 2-80-2-34-10-64-8-104C10 32 30 6 60 6Z"/>
+      <symbol id="sola-campo" viewBox="0 0 120 300">
+        <use href="#contorno-sola" fill="var(--sola-cor, #FCCA0F)"/>
+        <g fill="var(--trava-cor, #0E552A)">
+          <circle cx="38" cy="50" r="9"/><circle cx="82" cy="50" r="9"/><circle cx="60" cy="38" r="8"/>
+          <circle cx="30" cy="100" r="9"/><circle cx="90" cy="100" r="9"/><circle cx="60" cy="118" r="8"/>
+          <circle cx="40" cy="232" r="11"/><circle cx="80" cy="232" r="11"/><circle cx="40" cy="282" r="10"/><circle cx="80" cy="282" r="10"/>
+        </g>
+      </symbol>
+      <symbol id="sola-society" viewBox="0 0 120 300">
+        <use href="#contorno-sola" fill="var(--sola-cor, #FCCA0F)"/>
+        <g fill="var(--trava-cor, #0E552A)">
+          <circle cx="36" cy="40" r="4.5"/><circle cx="60" cy="30" r="4.5"/><circle cx="84" cy="40" r="4.5"/>
+          <circle cx="26" cy="64" r="4.5"/><circle cx="48" cy="60" r="4.5"/><circle cx="72" cy="60" r="4.5"/><circle cx="94" cy="64" r="4.5"/>
+          <circle cx="24" cy="90" r="4.5"/><circle cx="46" cy="86" r="4.5"/><circle cx="74" cy="86" r="4.5"/><circle cx="96" cy="90" r="4.5"/>
+          <circle cx="26" cy="116" r="4.5"/><circle cx="48" cy="112" r="4.5"/><circle cx="72" cy="112" r="4.5"/><circle cx="94" cy="116" r="4.5"/>
+          <circle cx="34" cy="142" r="4.5"/><circle cx="60" cy="140" r="4.5"/><circle cx="86" cy="142" r="4.5"/>
+          <circle cx="30" cy="222" r="4.5"/><circle cx="52" cy="218" r="4.5"/><circle cx="68" cy="218" r="4.5"/><circle cx="90" cy="222" r="4.5"/>
+          <circle cx="28" cy="248" r="4.5"/><circle cx="50" cy="246" r="4.5"/><circle cx="70" cy="246" r="4.5"/><circle cx="92" cy="248" r="4.5"/>
+          <circle cx="36" cy="274" r="4.5"/><circle cx="60" cy="278" r="4.5"/><circle cx="84" cy="274" r="4.5"/>
+        </g>
+      </symbol>
+      <symbol id="sola-futsal" viewBox="0 0 120 300">
+        <use href="#contorno-sola" fill="var(--sola-cor, #FCCA0F)"/>
+        <g fill="none" stroke="var(--trava-cor, #0E552A)" stroke-width="5" stroke-linecap="round">
+          <circle cx="60" cy="78" r="22"/><circle cx="60" cy="78" r="9"/>
+          <path d="M22 128h76M20 146h80M22 164h76M26 200h68M24 218h72M24 236h72M28 254h64M34 272h52"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/catalogo-local.js"></script>
+  <script src="../Javascript/vitrine-info.js"></script>
+  <script src="../Javascript/inicial.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus pedidos — Joga Bonito</title>
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container pedidos-pagina">
+    <h1 class="titulo-secao">Meus pedidos</h1>
+    <p class="texto-suave">Acompanhe pagamento, separação, envio e entrega. Pedidos feitos no app também aparecem aqui.</p>
+    <div id="lista-pedidos" aria-live="polite"></div>
+
+    <details class="conta-senha painel" id="conta-senha">
+      <summary>Segurança da conta</summary>
+      <form id="form-senha" novalidate>
+        <div class="campo">
+          <label for="senha-atual">Senha atual</label>
+          <input type="password" id="senha-atual" autocomplete="current-password" required>
+        </div>
+        <div class="campo">
+          <label for="senha-nova">Nova senha</label>
+          <input type="password" id="senha-nova" autocomplete="new-password" required minlength="8" maxlength="64" aria-describedby="dica-senha">
+          <small id="dica-senha" class="texto-suave">De 8 a 64 caracteres, com letras e números.</small>
+        </div>
+        <div class="campo">
+          <label for="senha-confirma">Confirme a nova senha</label>
+          <input type="password" id="senha-confirma" autocomplete="new-password" required>
+        </div>
+        <div id="aviso-senha" class="aviso" hidden></div>
+        <button type="submit" class="btn btn-primario">Salvar nova senha</button>
+        <p class="texto-suave ajuda-sessoes">Ao trocar a senha, a conta é desconectada dos outros aparelhos.</p>
+      </form>
+      <div class="sair-todos">
+        <p class="texto-suave">Usou a conta em um computador público ou perdeu o celular?</p>
+        <button type="button" class="btn btn-contorno btn-pequeno" id="sair-todos">Sair de todos os aparelhos</button>
+      </div>
+    </details>
+
+    <details class="conta-senha painel" id="conta-dados">
+      <summary>Meus dados (LGPD)</summary>
+      <div class="dados-lgpd">
+        <p class="texto-suave">Baixe tudo o que a loja guarda sobre você, ou exclua a conta. Saiba mais na <a href="privacidade.html">Política de Privacidade</a>.</p>
+        <button type="button" class="btn btn-contorno btn-pequeno" id="baixar-dados">Baixar meus dados</button>
+        <form id="form-excluir" novalidate>
+          <p class="texto-suave">Excluir a conta apaga nome, e-mail, endereços e avaliações. Os pedidos ficam guardados sem dados pessoais (obrigação fiscal). Não dá para desfazer.</p>
+          <div class="campo">
+            <label for="senha-exclusao">Confirme sua senha</label>
+            <input type="password" id="senha-exclusao" autocomplete="current-password" required>
+          </div>
+          <div id="aviso-exclusao" class="aviso" hidden></div>
+          <button type="submit" class="btn btn-perigo btn-pequeno">Excluir minha conta</button>
+        </form>
+      </div>
+    </details>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/pedidos.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo — Joga Bonito</title>
+  <meta name="description" content="Camisas da Temporada 2026, camisas retrô e chuteiras de campo, society e futsal. Filtre por categoria, piso e preço.">
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body>
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="container catalogo">
+    <nav class="trilha" aria-label="Você está em">
+      <a href="inicial.html">Início</a> <span aria-hidden="true">/</span> <span id="trilha-atual">Catálogo</span>
+    </nav>
+
+    <div class="catalogo-topo">
+      <div>
+        <h1 class="titulo-secao" id="titulo-catalogo">Catálogo</h1>
+        <p class="texto-suave" id="resumo-resultados" aria-live="polite"></p>
+      </div>
+      <a class="catalogo-craque" id="catalogo-craque" hidden>
+        <img alt="" loading="lazy">
+        <span class="catalogo-craque-texto"><strong></strong><span></span></span>
+      </a>
+    </div>
+
+    <div class="catalogo-layout">
+      <aside class="filtros painel" aria-label="Filtros">
+        <form id="form-filtros">
+          <fieldset>
+            <legend>Categoria</legend>
+            <label class="opcao"><input type="radio" name="categoria" value="" checked> Todas</label>
+            <label class="opcao"><input type="radio" name="categoria" value="temporada-2026"> Temporada 2026</label>
+            <label class="opcao"><input type="radio" name="categoria" value="retro"> Camisas Retrô</label>
+            <label class="opcao"><input type="radio" name="categoria" value="chuteiras"> Chuteiras</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Linha</legend>
+            <label class="opcao"><input type="radio" name="linha" value="" checked> Todas</label>
+            <label class="opcao" data-grupo="camisa"><input type="radio" name="linha" value="Clube"> Clubes</label>
+            <label class="opcao" data-grupo="camisa"><input type="radio" name="linha" value="Seleção"> Seleções</label>
+            <label class="opcao" data-grupo="chuteira"><input type="radio" name="linha" value="Campo"> Campo</label>
+            <label class="opcao" data-grupo="chuteira"><input type="radio" name="linha" value="Society"> Society</label>
+            <label class="opcao" data-grupo="chuteira"><input type="radio" name="linha" value="Futsal"> Futsal</label>
+          </fieldset>
+
+          <fieldset id="filtro-marca" hidden>
+            <legend>Marca</legend>
+            <label class="opcao"><input type="radio" name="marca" value="" checked> Todas</label>
+            <label class="opcao"><input type="radio" name="marca" value="Nike"> Nike</label>
+            <label class="opcao"><input type="radio" name="marca" value="adidas"> adidas</label>
+            <label class="opcao"><input type="radio" name="marca" value="Umbro"> Umbro</label>
+            <label class="opcao"><input type="radio" name="marca" value="Joma"> Joma</label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Preço máximo</legend>
+            <input type="range" id="preco-max" name="precoMax" aria-label="Preço máximo" min="300" max="900" step="50" value="900" aria-describedby="preco-max-valor">
+            <p id="preco-max-valor" class="texto-suave">Até R$ 900,00</p>
+          </fieldset>
+
+          <label class="opcao"><input type="checkbox" name="disponivel" id="so-disponivel"> Só com estoque</label>
+
+          <div class="campo" style="margin-top:14px">
+            <label for="ordem">Ordenar por</label>
+            <select id="ordem" name="ordem">
+              <option value="relevancia">Mais relevantes</option>
+              <option value="menor-preco">Menor preço</option>
+              <option value="maior-preco">Maior preço</option>
+              <option value="avaliacao">Mais bem avaliados</option>
+              <option value="nome">Nome (A–Z)</option>
+              <option value="novidades">Novidades</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-contorno btn-pequeno btn-bloco" id="limpar-filtros">Limpar filtros</button>
+        </form>
+      </aside>
+
+      <section aria-label="Produtos">
+        <div id="aviso-offline-area"></div>
+        <div class="grade-produtos" id="resultado"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/catalogo-local.js"></script>
+  <script src="../Javascript/vitrine-info.js"></script>
+  <script src="../Javascript/catalogo.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar conta — Joga Bonito</title>
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body class="pagina-auth">
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="auth">
+    <figure class="auth-foto">
+      <img src="../IMG/Jogadores/cr7-2008.jpg" alt="Cristiano Ronaldo beija a medalha com a camisa vermelha do Manchester United, em 2008" width="1600" height="1303" style="--foco:50% 30%">
+      <figcaption><span>Coleção Retrô</span><a href="Produtos.html?id=15">Camisa Manchester United 2007/08</a></figcaption>
+    </figure>
+    <section class="auth-caixa painel" aria-labelledby="titulo-cadastro">
+      <h1 id="titulo-cadastro">Criar conta</h1>
+      <p class="texto-suave">Leva menos de um minuto.</p>
+
+      <div id="aviso" class="aviso" hidden role="alert"></div>
+
+      <form id="form-cadastro" novalidate>
+        <div class="campo">
+          <label for="nome">Nome completo</label>
+          <input id="nome" autocomplete="name" required minlength="3" maxlength="100">
+        </div>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" autocomplete="email" spellcheck="false" inputmode="email" required maxlength="120">
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="senha-campo">
+            <input type="password" id="senha" autocomplete="new-password" required minlength="8" maxlength="64" aria-describedby="regras-senha">
+            <button type="button" class="ver-senha" aria-label="Mostrar senha" data-alvo="senha">Ver</button>
+          </div>
+          <ul class="regras-senha" id="regras-senha">
+            <li data-regra="tamanho">Pelo menos 8 caracteres</li>
+            <li data-regra="letra">Uma letra</li>
+            <li data-regra="numero">Um número</li>
+          </ul>
+        </div>
+        <div class="campo">
+          <label for="confirmar">Confirme a senha</label>
+          <input type="password" id="confirmar" autocomplete="new-password" required>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="lgpd" required>
+          <span>Li e aceito a <a href="privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>. Meus dados serão usados apenas para processar pedidos e entregas (LGPD).</span>
+        </label>
+        <button type="submit" class="btn btn-primario btn-bloco" id="btn-cadastrar">Criar conta</button>
+      </form>
+
+      <p class="auth-troca">Já tem conta? <a href="login.html" id="link-login">Entrar</a></p>
+    </section>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/auth.js"></script>
+</body>
+</html>

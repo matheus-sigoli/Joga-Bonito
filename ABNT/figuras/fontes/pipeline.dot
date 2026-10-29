@@ -1,0 +1,11 @@
+digraph P {
+  graph [rankdir=LR, fontname="Arial", nodesep=0.3, ranksep=0.4, pad=0.3, bgcolor=white];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=10, fillcolor="#E8F2EB", color="#0E552A"];
+  edge [color="#0E552A"];
+  push [label="push / pull request", shape=ellipse, fillcolor="#FFF6CC", color="#C9A000"];
+  api [label="Job api\nxUnit · publish"]; integ [label="Job integracao\nAPI real + SQL Server 2022"];
+  web [label="Job web\nnode --check · 21 testes E2E"]; mob [label="Job mobile\nflutter analyze · test · APK"];
+  dk [label="Job docker (main)\nbuild multi-stage → GHCR"];
+  dp [label="Job deploy\nmigra Azure SQL → App Service\n/health/ready + verificação", fillcolor="#0E552A", fontcolor=white];
+  push -> api; push -> integ; push -> web; push -> mob; api -> dk; integ -> dk; web -> dk; mob -> dk; dk -> dp;
+}

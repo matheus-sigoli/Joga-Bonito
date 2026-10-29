@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — Joga Bonito</title>
+  <link rel="icon" type="image/png" href="../IMG/LOGO 2.png">
+  <link rel="stylesheet" href="../CSS/base.css">
+  <link rel="stylesheet" href="../CSS/paginas.css">
+</head>
+<body class="pagina-auth">
+  <div id="cabecalho"></div>
+
+  <main id="conteudo" class="auth">
+    <figure class="auth-foto">
+      <img src="../IMG/Jogadores/mbappe.jpg" alt="Mbappé comemorando gol com a camisa branca do Real Madrid" width="1600" height="900" style="--foco:58% 35%">
+      <figcaption><span>Temporada 2026</span><a href="Produtos.html?id=9">Camisa Real Madrid 2026/27</a></figcaption>
+    </figure>
+    <section class="auth-caixa painel" aria-labelledby="titulo-login">
+      <h1 id="titulo-login">Entrar</h1>
+      <p class="texto-suave">Acompanhe pedidos, use cupons e compre mais rápido.</p>
+
+      <div id="aviso" class="aviso" hidden role="alert"></div>
+
+      <form id="form-login" novalidate>
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" autocomplete="email" spellcheck="false" inputmode="email" required>
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="senha-campo">
+            <input type="password" id="senha" autocomplete="current-password" required>
+            <button type="button" class="ver-senha" aria-label="Mostrar senha" data-alvo="senha">Ver</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primario btn-bloco" id="btn-entrar">Entrar</button>
+      </form>
+
+      <p class="auth-troca">Ainda não tem conta? <a href="cadastro.html" id="link-cadastro">Criar conta</a></p>
+
+      <div class="contas-demo" id="contas-demo" hidden>
+        <p>Entrar com uma conta de demonstração <span class="texto-fraco">(demonstração)</span></p>
+        <div class="contas-demo-botoes">
+          <button type="button" class="btn btn-contorno btn-pequeno" data-email="matheus@estudante.com" data-senha="Cliente@2026">Cliente</button>
+          <button type="button" class="btn btn-contorno btn-pequeno" data-email="admin@jogabonito.com" data-senha="Admin@2026">Administrador</button>
+          <button type="button" class="btn btn-contorno btn-pequeno" data-email="professor@unip.br" data-senha="Unip@2026">Professor</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="rodape"></div>
+
+  <script src="../Javascript/config.js"></script>
+  <script src="../Javascript/api.js"></script>
+  <script src="../Javascript/layout.js"></script>
+  <script src="../Javascript/auth.js"></script>
+</body>
+</html>
