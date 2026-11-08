@@ -10,12 +10,14 @@ vermelha e que a acessibilidade e o site publicado ainda não tinham sido confer
 ## O que foi encontrado
 | Onde | Problema | Causa |
 |---|---|---|
-| Workflow **CI-CD** | 1 de 30 testes E2E falhou (`test_17`, checkout): `#cep` não apareceu em 30 s | Na máquina do GitHub, o clique em "Finalizar" acontecia antes de a simulação do carrinho terminar e a janela do checkout não abria. Localmente os 30 testes passam. |
+| Workflow **CI-CD** | 1 de 30 testes E2E falhou (`test_17`, checkout): `#cep` não apareceu em 30 s | O passo `entrar()` do teste clicava em "Entrar" e seguia sem esperar a resposta. Na máquina mais lenta do GitHub, o teste abria o carrinho com o login ainda em andamento, a navegação cortava a requisição e a sessão nunca era gravada; "Finalizar" então levava à tela de login. Erro do teste, não da loja. Localmente os 30 testes passam. |
 | Workflow **Site público** | Falha em todo push: "Get Pages site failed" | O GitHub Pages não está ativado; o site oficial sai pela Vercel. |
 | Ações do GitHub | Aviso de Node.js 20 obsoleto | `checkout@v4`, `setup-node@v4`, `setup-python@v5`, `setup-dotnet@v4`, `upload-artifact@v4`. |
 | `Site/IMG/Jogadores` | 11 fotos originais soltas (`messi.jpg`, `cr7 1.jpg`, `Kaka.avif`…) que o site não usa | Enviadas junto com as fotos novas em 28/10. |
 
 ## Decisão e correções
+- `test_loja.py`: `entrar()` espera a resposta de `/api/auth/login` e, se deu certo, a saída da tela
+  de login (a causa real, achada pelo diagnóstico da primeira correção).
 - `test_loja.py`: novo passo `abrir_checkout()` (espera a rede ficar parada, clica, espera a janela do
   checkout e tenta mais uma vez); se não abrir, o teste falha mostrando a URL e o aviso da página.
   Usado nos testes 8 e 17.

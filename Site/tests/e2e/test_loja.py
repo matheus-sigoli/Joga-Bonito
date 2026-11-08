@@ -122,10 +122,17 @@ class TesteLoja(unittest.TestCase):
         self.pagina.wait_for_load_state("networkidle")
 
     def entrar(self, email: str, senha: str):
+        """Faz login e espera terminar: a resposta da API e, se deu certo, a saída da tela de
+        login. Sem essa espera, numa máquina lenta (CI) o teste navegava para outra página com o
+        login ainda em andamento e a sessão nunca era gravada."""
         self.abrir("login.html")
         self.pagina.fill("#email", email)
         self.pagina.fill("#senha", senha)
-        self.pagina.click("#btn-entrar")
+        with self.pagina.expect_response(lambda r: "/api/auth/login" in r.url) as resposta:
+            self.pagina.click("#btn-entrar")
+        if resposta.value.ok:
+            self.pagina.wait_for_url(lambda url: "login.html" not in url)
+            self.pagina.wait_for_load_state("networkidle")
 
     # ------------------------------------------------------------------ dados
     def test_01_catalogo_igual_a_planilha(self):
