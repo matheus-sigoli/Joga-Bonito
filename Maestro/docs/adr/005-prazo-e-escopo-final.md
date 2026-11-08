@@ -28,3 +28,15 @@ Todos os itens da lista entram no escopo. A ordem segue o que destrava o resto:
 | Acessibilidade | Automática OK; manual pendente |
 | Joga Junto e privacidade | OK |
 | Site público | https://joga-bonito-sigma.vercel.app aberto ao público, com aviso de pagamento simulado e VLibras. Ainda sem as 41 fotos novas (sobem no próximo push) |
+
+## Situação em 08/11/2026
+Detalhes em [ADR 008](008-verificacao-final-nov-2026.md).
+
+| Item da lista | Situação |
+|---|---|
+| Executar todos os testes | Web 30/30 local; pipeline corrigido (teste do checkout e GitHub Pages) |
+| Integração Web + Mobile + API | Web conferida no site publicado; **Mobile pendente** (celular real) |
+| Acessibilidade | VLibras 7.12 e teclado conferidos no site publicado; **NVDA e TalkBack pendentes** |
+| Site público | Conferido no navegador: inicial, login de demonstração, compra com Pix, painel admin |
+| Azure | Plano pronto; publicação continua adiada ([ADR 002](002-implantacao-azure-adiada.md)) |
+| Backlog | Sprint 6 estendida até 10/11; 157 de 165 pontos (95%) |

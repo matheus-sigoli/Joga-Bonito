@@ -215,7 +215,7 @@ class TesteLoja(unittest.TestCase):
         self.pagina.fill("#cupom", "BEMVINDO10")
         self.pagina.click("#form-cupom button")
         expect(self.pagina.locator("#v-desconto")).to_contain_text("29,99")
-        self.pagina.click("#btn-finalizar")
+        self.abrir_checkout()
         for campo, valor in {"cep": "01310100", "numero": "1000", "rua": "Avenida Paulista",
                              "bairro": "Bela Vista", "cidade": "São Paulo", "uf": "SP"}.items():
             self.pagina.fill(f"#{campo}", valor)
@@ -352,6 +352,22 @@ class TesteLoja(unittest.TestCase):
         self.assertEqual(api("/api/auth/login", "POST", {"email": "quatro@teste.com", "senha": "Camisa10Gol"})[0], 401)
 
     # ------------------------------------------------- checkout e Joga Junto
+    def abrir_checkout(self):
+        """Clica em Finalizar e espera a janela do checkout. Na máquina mais lenta do CI a
+        primeira simulação do carrinho pode ainda estar em andamento: tenta de novo uma vez e,
+        se não abrir, falha mostrando o aviso que a página exibiu."""
+        self.pagina.wait_for_load_state("networkidle")
+        janela = self.pagina.locator("dialog#checkout[open]")
+        for _ in range(2):
+            self.pagina.click("#btn-finalizar")
+            try:
+                janela.wait_for(state="visible", timeout=10_000)
+                return
+            except Exception:
+                self.pagina.wait_for_load_state("networkidle")
+        aviso = self.pagina.locator("#aviso-carrinho").inner_text() if self.pagina.locator("#aviso-carrinho").count() else ""
+        self.fail(f"O checkout não abriu. URL: {self.pagina.url} · aviso: {aviso!r}")
+
     def test_17_checkout_simulado_joga_junto_e_carrinho_preservado_na_falha(self):
         self.abrir("Produtos.html?id=10")
         self.pagina.click("#tamanhos button[data-tamanho='M']")
@@ -359,7 +375,7 @@ class TesteLoja(unittest.TestCase):
         self.entrar("matheus@estudante.com", "Cliente@2026")
         self.abrir("carrinho.html")
         expect(self.pagina.locator("#v-joga-junto")).to_contain_text("4,00")      # 1% de R$ 399,90
-        self.pagina.click("#btn-finalizar")
+        self.abrir_checkout()
         for campo, valor in {"cep": "01310100", "numero": "1", "rua": "Rua A", "bairro": "Centro",
                              "cidade": "São Paulo", "uf": "SP"}.items():
             self.pagina.fill(f"#{campo}", valor)

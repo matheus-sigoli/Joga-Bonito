@@ -1,6 +1,9 @@
 # ============================================================================
-# JOGA BONITO — site público no GitHub Pages
-#   A cada push na main: organiza as fotos de Site/IMG/Produtos/<id>/, gera o site
+# JOGA BONITO — site público no GitHub Pages (alternativa à Vercel, só manual)
+#   O site oficial sai pela Vercel (vercel.json), a cada push na main:
+#   https://joga-bonito-sigma.vercel.app. Este workflow fica para quem quiser
+#   publicar também no GitHub Pages: Actions › Site público › Run workflow.
+#   Ao rodar: organiza as fotos de Site/IMG/Produtos/<id>/, gera o site
 #   estático (publico/, loja em modo demonstração) e publica em
 #   https://<usuario>.github.io/<repositorio>/  (abre direto na página inicial).
 #   Ative uma vez: Settings › Pages › Build and deployment › Source: GitHub Actions.
@@ -8,10 +11,7 @@
 name: Site público
 
 on:
-  push:
-    branches: [main]
-    paths: ["Site/**", ".github/workflows/site-publico.yml"]
-  workflow_dispatch:
+  workflow_dispatch:     # sem push: o GitHub Pages não está ativado neste repositório
 
 permissions:
   contents: read
@@ -29,8 +29,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Organizar fotos e catálogo

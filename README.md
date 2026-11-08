@@ -48,7 +48,7 @@ Requisitos: **.NET 8 SDK** e um **SQL Server** (Express, instância padrão ou L
 
 O log fica em `%LOCALAPPDATA%\JogaBonito\logs\api.log`. Para testar o app num **celular físico** na mesma rede: `iniciar-projeto.bat -Rede`.
 
-### Opção 2 — Site público (GitHub Pages ou Vercel), sem servidor
+### Opção 2 — Site público (Vercel), sem servidor
 Para divulgar a loja num link, há uma versão que roda inteira no navegador de quem visita:
 - o link abre direto na página inicial;
 - o visitante entra com as contas de demonstração (botões na tela de login) ou cria conta, compra, acompanha pedidos e usa o painel do administrador;
@@ -57,13 +57,9 @@ Para divulgar a loja num link, há uma versão que roda inteira no navegador de 
 
 **Por que não "ligar o `.bat` pelo link"?** Nenhum site consegue executar programas no computador de quem o visita: os navegadores bloqueiam isso por segurança. Por isso, a versão pública não precisa do `.bat` nem de servidor. A loja completa, com .NET e SQL Server de verdade, fica para o seu computador (opções 1 e 3) ou para a nuvem ([infra/IMPLANTACAO.md](infra/IMPLANTACAO.md)).
 
-**GitHub Pages:**
-1. Envie o projeto para o GitHub.
-2. Em *Settings › Pages › Source*, escolha **GitHub Actions**.
+**Endereço oficial: https://joga-bonito-sigma.vercel.app**. A Vercel publica a cada push na `main`. O `vercel.json` da raiz define o build (fotos + site público), a pasta `publico/` e os cabeçalhos de segurança.
 
-A cada push na `main`, o workflow `site-publico.yml` organiza as fotos, gera o site e publica em `https://<usuario>.github.io/<repositorio>/`.
-
-**Vercel:** *Add New › Project* e importe o repositório. O `vercel.json` da raiz já define o build (fotos + site público), a pasta `publico/` e os cabeçalhos de segurança. Não precisa configurar nada.
+**GitHub Pages (opcional):** em *Settings › Pages › Source*, escolha **GitHub Actions** e rode *Actions › Site público › Run workflow*. O workflow `site-publico.yml` é só manual, porque o site oficial já sai pela Vercel.
 
 **Testar no seu computador:**
 ```bash
@@ -112,7 +108,7 @@ Depois, `Site/banco/conferencia.sql` confere no banco 23 regras de consistência
 
 ```bash
 dotnet test Site/tests/JogaBonito.Tests             # unitários (regras, segurança, moderação, Joga Junto, LGPD)
-python Site/tests/e2e/test_loja.py                  # 26 testes no navegador com API simulada (Site/tests/e2e/README.md)
+python Site/tests/e2e/test_loja.py                  # 30 testes no navegador com API simulada (Site/tests/e2e/README.md)
 cd Mobile && flutter test                           # modelos, sessão segura, carrinho e leitor de tela
 ```
 

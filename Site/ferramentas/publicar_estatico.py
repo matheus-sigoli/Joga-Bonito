@@ -86,7 +86,7 @@ def main() -> None:
 
     for pasta in ("HTML", "CSS", "Javascript", "IMG"):
         shutil.copytree(SITE / pasta, SAIDA / pasta,
-                        ignore=shutil.ignore_patterns("_originais", "Thumbs.db", ".DS_Store", "__*"))
+                        ignore=shutil.ignore_patterns("_originais", "originais", "Thumbs.db", ".DS_Store", "__*"))
 
     # Modo demonstração + produtos para o motor da loja (páginas sem catalogo-local.js também precisam)
     (SAIDA / "Javascript" / "config.js").write_text(
