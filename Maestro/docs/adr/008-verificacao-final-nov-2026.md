@@ -24,7 +24,10 @@ vermelha e que a acessibilidade e o site publicado ainda não tinham sido confer
 - `site-publico.yml` passa a rodar **só manualmente** (Actions › Site público › Run workflow).
   Continua disponível se o grupo quiser ativar o GitHub Pages.
 - Ações atualizadas para as primeiras versões em Node 24: `checkout@v5`, `setup-node@v5`,
-  `setup-python@v6`, `setup-dotnet@v5`, `upload-artifact@v5`.
+  `setup-python@v6`, `setup-dotnet@v5`, `upload-artifact@v6`.
+- `Site/backend/Dockerfile`: copia `Javascript/catalogo-local.js` para a etapa de build. Com os testes
+  verdes, o job da imagem rodou pela primeira vez e 2 testes do sincronizador falharam dentro do
+  container porque não achavam o catálogo.
 - As 11 fotos foram **movidas** (não apagadas) para `Site/IMG/Jogadores/outras/originais/`, e o
   `publicar_estatico.py` deixa essa pasta fora do site público. Mover em vez de apagar evita que um
   `git pull` no PC apague os arquivos.

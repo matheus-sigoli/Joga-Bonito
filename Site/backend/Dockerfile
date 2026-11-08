@@ -11,6 +11,8 @@ COPY tests/JogaBonito.Tests/JogaBonito.Tests.csproj tests/JogaBonito.Tests/
 RUN dotnet restore tests/JogaBonito.Tests/JogaBonito.Tests.csproj
 COPY backend/ backend/
 COPY tests/ tests/
+# Os testes do sincronizador conferem o catálogo real (Javascript/catalogo-local.js)
+COPY Javascript/catalogo-local.js Javascript/catalogo-local.js
 RUN dotnet test tests/JogaBonito.Tests/JogaBonito.Tests.csproj --no-restore -c Release \
  && dotnet publish backend/JogaBonito.Api.csproj --no-restore -c Release -o /out
 

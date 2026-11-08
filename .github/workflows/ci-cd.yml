@@ -42,7 +42,7 @@ jobs:
         run: dotnet test Site/tests/JogaBonito.Tests/JogaBonito.Tests.csproj --no-restore -c Release --logger "trx;LogFileName=resultado.trx"
       - name: Publicar artefato
         run: dotnet publish Site/backend/JogaBonito.Api.csproj -c Release -o publish
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: api-publicada
           path: publish
@@ -134,7 +134,7 @@ jobs:
             echo "::warning::Variável URL_LOJA não definida: o APK usa o endereço de desenvolvimento (emulador)."
             flutter build apk --release
           fi
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: app-android
           path: Mobile/build/app/outputs/flutter-apk/app-release.apk
