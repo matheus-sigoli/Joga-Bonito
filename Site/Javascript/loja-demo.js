@@ -145,6 +145,7 @@
       let r;
 
       if (p === "/health" || p === "/health/live") return [200, "Healthy"];
+      if (p === "/api/loja") return [200, { loja: "Joga Bonito", versao: "1.0", recursos: ["catalogo", "pedidos", "avaliacoes", "lgpd"] }];
       if (p === "/health/ready") return [200, { status: "Healthy", componentes: [
         { nome: "sqlserver", status: "Healthy", descricao: "SQL Server acessível. (simulado)", duracaoMs: 3.2 }], duracaoMs: 3.4 }];
 
@@ -310,7 +311,12 @@
           vendasPorCategoria: [{ categoria: "Temporada 2026", unidades: 3, receita: 1049.7 }, { categoria: "Chuteiras", unidades: 1, receita: 549.9 }],
           maisVendidos: [{ produtoId: 1, nome: "Camisa Brasil 2026 Home", categoria: "Temporada 2026", unidades: 2, receita: 699.8 }],
           totalJogaJunto: +pedidos.filter(x => x.status !== "Cancelado").reduce((s, x) => s + (x.jogaJunto || 0), 0).toFixed(2),
-          avaliacoesPendentes: avaliacoes.filter(a => a.status === "Pendente").length }];
+          avaliacoesPendentes: avaliacoes.filter(a => a.status === "Pendente").length,
+          vendasPorCanal: ["Web", "Mobile"].map(canal => {
+            const doCanal = pedidos.filter(x => (x.origem || "Web") === canal && x.status !== "Cancelado");
+            return { canal, pedidos: doCanal.length, receita: +doCanal.reduce((s, x) => s + x.total, 0).toFixed(2),
+                     clientes: new Set(doCanal.map(x => x.usuarioId)).size };
+          }) }];
         if (p === "/api/admin/avaliacoes") {
           const st = q.get("status");
           return [200, avaliacoes.filter(a => !st || a.status === st).map(a => ({

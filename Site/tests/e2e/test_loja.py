@@ -694,5 +694,36 @@ class TesteLoja(unittest.TestCase):
             estatico.wait(5)
 
 
+    def test_31_app_celular_acha_a_loja_e_o_pedido_aparece_por_canal(self):
+        """O que o app Flutter faz: identifica a loja (GET /api/loja), entra com token (Bearer, sem cookie)
+        e compra com origem Mobile. O painel mostra o pedido em "Vendas por canal" como App."""
+        status, info, _ = api("/api/loja")
+        self.assertEqual(status, 200)
+        self.assertEqual(info["loja"], "Joga Bonito")
+
+        status, sessao, _ = api("/api/auth/login", "POST", {"email": "matheus@estudante.com", "senha": "Cliente@2026"})
+        self.assertEqual(status, 200)
+        token = sessao["token"]
+        status, pedido, _ = api("/api/pedidos", "POST", {
+            "itens": [{"produtoId": 11, "tamanho": "M", "quantidade": 1}],
+            "formaPagamento": "PIX", "parcelas": 1, "cupom": None, "origem": "Mobile",
+            "endereco": {"cep": "01310100", "rua": "Avenida Paulista", "numero": "900", "complemento": None,
+                         "bairro": "Bela Vista", "cidade": "São Paulo", "estado": "SP"}}, token=token)
+        self.assertEqual(status, 201, pedido)
+        status, meus, _ = api("/api/pedidos/meus", token=token)
+        self.assertEqual(next(x for x in meus if x["id"] == pedido["pedidoId"])["origem"], "Mobile")
+
+        status, adm, _ = api("/api/auth/login", "POST", {"email": "admin@jogabonito.com", "senha": "Admin@2026"})
+        status, painel, _ = api("/api/admin/dashboard", token=adm["token"])
+        canais = {c["canal"]: c for c in painel["vendasPorCanal"]}
+        self.assertEqual(set(canais), {"Web", "Mobile"})
+        self.assertGreaterEqual(canais["Mobile"]["pedidos"], 1)
+
+        self.entrar("admin@jogabonito.com", "Admin@2026")
+        self.abrir("admin.html")
+        expect(self.pagina.locator("#vendas-canal")).to_contain_text("App (celular)")
+        expect(self.pagina.locator("#vendas-canal")).to_contain_text("Site")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

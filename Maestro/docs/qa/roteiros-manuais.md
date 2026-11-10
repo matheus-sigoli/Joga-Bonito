@@ -46,29 +46,38 @@ Rode num Windows real: o lançador não pode ser executado no ambiente de CI (Li
 - [ ] `iniciar-projeto.bat -Rede`: o app no celular físico conecta pelo IP do PC.
 
 ## 5. App no celular Android real, ligado à loja do PC (sem Azure)
-Decisão em `Maestro/docs/adr/003-app-testado-em-celular-real.md`. PC e celular na mesma rede Wi-Fi.
+Decisões em `Maestro/docs/adr/003-app-testado-em-celular-real.md` e `009-app-conecta-na-loja-do-pc.md`.
+PC e celular **na mesma rede Wi-Fi** (de casa ou da escola; não use rede de visitantes).
 
-Preparar o celular (uma vez):
-1. Configurações › Sobre o telefone › tocar 7 vezes em **Número da versão** (ativa as Opções do desenvolvedor).
-2. Configurações › Sistema › **Opções do desenvolvedor** › ligar **Depuração USB**.
-3. Ligar o cabo USB no PC e aceitar "Permitir depuração USB" no celular.
-4. No PC: `adb devices` mostra o aparelho como `device` (não `unauthorized`).
+No PC (uma vez por teste):
+1. Dar dois cliques em **`iniciar-com-celular.bat`**.
+   - Na primeira vez o Windows pede permissão de administrador: **Sim** (libera a porta 5000 só para a rede local).
+   - Se avisar que o Wi-Fi está como **Rede pública**, responder **S** (só em rede de confiança).
+2. A janela mostra `CELULAR http://192.168.x.x:5000`: anote, caso a busca automática não ache.
 
-Rodar:
-1. Parar a loja, se estiver ligada (`parar-projeto.bat`), e subir aberta para a rede: `iniciar-projeto.bat -Rede`.
-   Na primeira vez o Windows pergunta sobre o Firewall: permitir só em **Redes privadas**.
-2. Descobrir o IP do PC: `ipconfig` › "Endereço IPv4" do Wi-Fi (ex.: `192.168.0.10`).
-3. Na pasta `Mobile`: `flutter run --dart-define=API_URL=http://IP-DO-PC:5000`.
+Instalar o app (escolha um jeito):
+- **Sem cabo:** no GitHub › Actions › último **CI-CD** verde › artefato **app-android-rede-local** › baixar,
+  descompactar e abrir `joga-bonito-rede-local.apk` no celular (permitir "instalar apps desconhecidos").
+- **Com cabo e Flutter no PC:** ativar Opções do desenvolvedor (7 toques em Número da versão) e Depuração USB,
+  conectar o cabo e, na pasta `Mobile`, rodar `flutter run`.
+
+Conectar:
+1. Abrir o app. Sem conexão, a loja mostra **CONECTAR À LOJA** (ou Perfil › Conectar à loja).
+2. Tocar em **PROCURAR A LOJA NA REDE**: em poucos segundos aparece "Conectado à loja em http://192.168.x.x:5000".
+   Se não achar, digitar o endereço que a janela do PC mostrou.
 
 Verificar:
 - [ ] O app abre, mostra os 36 produtos e as fotos.
 - [ ] Login com `matheus@estudante.com` / `Cliente@2026`.
+- [ ] Na finalização, digitar o CEP `01310100`: rua, bairro, cidade e UF se preenchem sozinhos.
 - [ ] Compra pelo app (Pix): aparece em *Meus pedidos* no app **e** no site (`http://localhost:5000`, mesma conta).
-- [ ] No painel admin do site, o pedido do app tem origem **Mobile**; um pedido feito no site tem origem **Web**.
+- [ ] No painel admin do site: o pedido do app tem origem **Mobile**, e **Vendas por canal** mostra "App (celular)".
+- [ ] No app, abrir o produto comprado › **Avaliar** › 5 estrelas: a avaliação aparece no app e no site.
+- [ ] Perfil › **Meus dados (LGPD)** mostra a conta, os pedidos e as avaliações.
 - [ ] Cancelar pelo site um pedido feito no app: o estoque do tamanho volta (ver na página do produto, no app).
-- [ ] Desligar o Wi-Fi do celular: o app mostra aviso de sem conexão, sem travar. Religar: volta a funcionar.
+- [ ] Desligar o Wi-Fi do celular: o app mostra o catálogo salvo e o aviso de sem conexão, sem travar. Religar: volta.
 - [ ] Rodar o roteiro 1 (TalkBack) neste mesmo aparelho.
-- [ ] Ao terminar: `parar-projeto.bat` e `iniciar-projeto.bat` sem `-Rede` (a loja volta a aceitar só este PC).
+- [ ] Ao terminar (opcional): `iniciar-projeto.bat -SemRede` volta a loja a aceitar só este PC.
 
 ## 6. Site público publicado (Vercel: https://joga-bonito-sigma.vercel.app)
 Use sempre esse endereço com a banca: os endereços de cada implantação pedem login da Vercel.

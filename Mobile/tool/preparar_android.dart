@@ -6,13 +6,18 @@
 //   (emulador 10.0.2.2 ou celular na mesma rede Wi-Fi).
 // * Build de PRODUÇÃO (APK release): nada é liberado — o Android só aceita
 //   HTTPS, além da regra do próprio app (ApiCliente.normalizarServidor).
+// * Com --rede-local: gera o APK de DEMONSTRAÇÃO para instalar no celular e usar
+//   com a API no PC pela rede Wi-Fi (HTTP). O próprio app continua recusando HTTP
+//   fora da rede local (ApiCliente.normalizarServidor) — ver ADR 009.
+// * Nome do app na tela do celular: "Joga Bonito".
 // * Garante a permissão de internet no manifesto principal.
 // * Apaga o test/widget_test.dart de exemplo do flutter create (usa MyApp).
 // Pode ser executado várias vezes: só altera o que falta.
 // ============================================================================
 import 'dart:io';
 
-void main() {
+void main(List<String> args) {
+  final redeLocal = args.contains('--rede-local');
   final principal = File('android/app/src/main/AndroidManifest.xml');
   final depuracao = File('android/app/src/debug/AndroidManifest.xml');
   if (!principal.existsSync()) {
@@ -29,8 +34,18 @@ void main() {
     stdout.writeln('[ok] Permissão de internet adicionada ao manifesto principal');
   }
   texto = principal.readAsStringSync();
-  if (texto.contains('usesCleartextTraffic="true"')) {
-    principal.writeAsStringSync(texto.replaceAll('android:usesCleartextTraffic="true"', ''));
+  if (texto.contains('android:label="jogabonito_mobile"')) {
+    principal.writeAsStringSync(texto.replaceAll('android:label="jogabonito_mobile"', 'android:label="Joga Bonito"'));
+    stdout.writeln('[ok] Nome do app: Joga Bonito');
+  }
+  texto = principal.readAsStringSync();
+  if (redeLocal) {
+    if (!texto.contains('usesCleartextTraffic="true"')) {
+      principal.writeAsStringSync(texto.replaceFirst('<application', '<application android:usesCleartextTraffic="true"'));
+      stdout.writeln('[ok] APK rede local: HTTP liberado para falar com a API no PC (Wi-Fi)');
+    }
+  } else if (texto.contains('usesCleartextTraffic="true"')) {
+    principal.writeAsStringSync(texto.replaceAll(' android:usesCleartextTraffic="true"', '').replaceAll('android:usesCleartextTraffic="true"', ''));
     stdout.writeln('[ok] HTTP removido do manifesto de produção (só HTTPS)');
   }
 
@@ -58,5 +73,7 @@ void main() {
     stdout.writeln('[ok] Teste de exemplo do flutter create removido (usava MyApp)');
   }
 
-  stdout.writeln('Android pronto. Produção: flutter build apk --release --dart-define=API_URL=https://<sua-loja>.azurewebsites.net');
+  stdout.writeln(redeLocal
+      ? 'Android pronto (rede local). flutter build apk --release  → instale no celular e use iniciar-com-celular.bat no PC'
+      : 'Android pronto. Produção: flutter build apk --release --dart-define=API_URL=https://<sua-loja>.azurewebsites.net');
 }

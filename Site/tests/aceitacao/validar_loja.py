@@ -180,6 +180,8 @@ def main() -> int:
     st, d, _ = anonimo.get("/health/ready")
     if not checar("/health/ready saudável", st == 200 and isinstance(d, dict) and d.get("status") == "Healthy", f"{st} {d}"):
         return resumo()
+    st, d, _ = anonimo.get("/api/loja")
+    checar("/api/loja identifica a loja (app acha o PC na rede)", st == 200 and isinstance(d, dict) and d.get("loja") == "Joga Bonito", f"{st} {d}")
 
     # ------------------------------------------------------------ 1. sessão
     secao("Cadastro, login, sessão e logout")
@@ -296,7 +298,8 @@ def main() -> int:
                f"{s.get('jogaJunto')} esperado {esperado_jj}")
 
         antes = saldo(anonimo, 13, tam)
-        st, p, _ = cli.post("/api/pedidos", pedido(13, tam, 1, "BEMVINDO10"))
+        # cli entra como o app (token Bearer): o pedido é gravado com origem Mobile
+        st, p, _ = cli.post("/api/pedidos", {**pedido(13, tam, 1, "BEMVINDO10"), "origem": "Mobile"})
         if not checar("pedido criado (201)", st == 201 and p.get("pedidoId"), f"{st} {msg(p)}"):
             raise Pular("sem pedido")
         pid = p["pedidoId"]
@@ -305,6 +308,7 @@ def main() -> int:
         checar("estoque baixou 1 peça", saldo(anonimo, 13, tam) == antes - 1, f"antes {antes}")
         st, meus, _ = cli.get("/api/pedidos/meus")
         checar("pedido aparece no histórico do cliente", st == 200 and any(x["id"] == pid for x in meus))
+        checar("pedido do app fica com origem Mobile", any(x["id"] == pid and x.get("origem") == "Mobile" for x in meus))
         st, det, _ = cli.get(f"/api/pedidos/{pid}")
         checar("detalhe: itens, total e linha do tempo",
                st == 200 and det["itens"][0]["produtoId"] == 13 and abs(det["total"] - p["total"]) < 0.01 and det["historico"],
@@ -352,6 +356,11 @@ def main() -> int:
             raise Pular("sem admin")
         st, d, _ = adm.get("/api/admin/dashboard")
         checar("indicadores do painel", st == 200 and d["totalProdutos"] >= 36 and "totalJogaJunto" in d and "avaliacoesPendentes" in d, f"{st}")
+        canais = {c["canal"]: c for c in (d.get("vendasPorCanal") or [])} if st == 200 else {}
+        # (o pedido do app criado acima já foi cancelado pelo roteiro: cancelados não entram na view)
+        checar("vendas por canal (view vw_VendasPorCanal): site e app lado a lado",
+               set(canais) == {"Web", "Mobile"} and all({"pedidos", "receita", "clientes"} <= set(c) for c in canais.values()),
+               f"{canais}")
         # Estoque
         tam = escolher_tamanho(anonimo, 8, 1)
         original = saldo(anonimo, 8, tam)

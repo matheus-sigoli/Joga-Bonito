@@ -7,6 +7,7 @@ import '../modelos/modelos.dart';
 import '../servicos/api_cliente.dart';
 import '../servicos/servicos.dart';
 import '../widgets/comum.dart';
+import '../widgets/conexao_dialogo.dart';
 import 'produto_tela.dart';
 
 class LojaTela extends StatefulWidget {
@@ -36,6 +37,7 @@ class _LojaTelaState extends State<LojaTela> {
   bool _carregando = true;
   bool _offline = false;
   String? _erro;
+  bool _semConexao = false;
   List<Produto> _produtos = [];
   final _buscaCtrl = TextEditingController();
 
@@ -55,6 +57,7 @@ class _LojaTelaState extends State<LojaTela> {
     setState(() {
       _carregando = true;
       _erro = null;
+      _semConexao = false;
     });
     try {
       final (lista, doCache) =
@@ -65,7 +68,12 @@ class _LojaTelaState extends State<LojaTela> {
         _offline = doCache;
       });
     } on ApiException catch (e) {
-      if (mounted) setState(() => _erro = e.mensagem);
+      if (mounted) {
+        setState(() {
+          _erro = e.mensagem;
+          _semConexao = e.semConexao;
+        });
+      }
     } finally {
       if (mounted) setState(() => _carregando = false);
     }
@@ -190,7 +198,18 @@ class _LojaTelaState extends State<LojaTela> {
                 child: EstadoVazio(
                   icone: Icons.wifi_off,
                   mensagem: _erro!,
-                  acao: OutlinedButton(onPressed: _carregar, child: const Text('Tentar de novo')),
+                  acao: Column(mainAxisSize: MainAxisSize.min, children: [
+                    if (_semConexao)
+                      FilledButton.icon(
+                        onPressed: () async {
+                          if (await conectarLoja(context)) _carregar();
+                        },
+                        icon: const Icon(Icons.wifi_find),
+                        label: const Text('CONECTAR À LOJA'),
+                      ),
+                    if (_semConexao) const SizedBox(height: 8),
+                    OutlinedButton(onPressed: _carregar, child: const Text('Tentar de novo')),
+                  ]),
                 ),
               )
             else if (_produtos.isEmpty)

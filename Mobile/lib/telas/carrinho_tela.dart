@@ -246,18 +246,53 @@ class _CheckoutTelaState extends State<CheckoutTela> {
   String? _obrigatorio(String? v) => (v == null || v.trim().isEmpty) ? 'Obrigatório' : null;
 
   Widget _campo(String chave, String rotulo,
-          {TextInputType? teclado, String? Function(String?)? validar, int? max, List<TextInputFormatter>? fmt}) =>
+          {TextInputType? teclado,
+          String? Function(String?)? validar,
+          int? max,
+          List<TextInputFormatter>? fmt,
+          ValueChanged<String>? aoMudar,
+          String? ajuda}) =>
       Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: TextFormField(
           controller: _c[chave],
-          decoration: InputDecoration(labelText: rotulo, counterText: ''),
+          decoration: InputDecoration(labelText: rotulo, counterText: '', helperText: ajuda),
           keyboardType: teclado,
           maxLength: max,
           inputFormatters: fmt,
           validator: validar,
+          onChanged: aoMudar,
         ),
       );
+
+  /// CEP com 8 dígitos: busca no ViaCEP e preenche rua, bairro, cidade e UF (a pessoa ainda pode editar).
+  String? _cepBuscado;
+  bool _buscandoCep = false;
+  String? _avisoCep;
+
+  Future<void> _aoMudarCep(String valor) async {
+    final limpo = CepServico.normalizar(valor);
+    if (limpo == null || limpo == _cepBuscado) return;
+    _cepBuscado = limpo;
+    setState(() {
+      _buscandoCep = true;
+      _avisoCep = null;
+    });
+    final e = await cep.buscar(limpo);
+    if (!mounted) return;
+    setState(() {
+      _buscandoCep = false;
+      if (e == null) {
+        _avisoCep = 'CEP não encontrado: preencha o endereço à mão.';
+        return;
+      }
+      _c['rua']!.text = e.rua;
+      _c['bairro']!.text = e.bairro;
+      _c['cidade']!.text = e.cidade;
+      _c['uf']!.text = e.uf;
+      _avisoCep = 'Endereço preenchido pelo CEP. Falta o número.';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +306,8 @@ class _CheckoutTelaState extends State<CheckoutTela> {
           const SizedBox(height: 10),
           _campo('cep', 'CEP', teclado: TextInputType.number, max: 8,
               fmt: [FilteringTextInputFormatter.digitsOnly],
+              aoMudar: _aoMudarCep,
+              ajuda: _buscandoCep ? 'Buscando o endereço...' : _avisoCep,
               validar: (v) => (v ?? '').length == 8 ? null : 'CEP com 8 dígitos'),
           _campo('rua', 'Rua', validar: _obrigatorio, max: 150),
           Row(children: [

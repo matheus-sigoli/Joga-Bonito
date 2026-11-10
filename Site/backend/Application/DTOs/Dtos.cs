@@ -104,6 +104,8 @@ public record SalvarProdutoRequest(
 
 public record VendaCategoriaResponse(string Categoria, int Unidades, decimal Receita);
 public record MaisVendidoResponse(int ProdutoId, string Nome, string Categoria, int Unidades, decimal Receita);
+/// <summary>Vendas por canal (Pedidos.Origem): "Web" = site, "Mobile" = app.</summary>
+public record VendaCanalResponse(string Canal, int Pedidos, decimal Receita, int Clientes);
 
 public record DashboardResponse(
     int TotalProdutos, int TotalPecasEstoque, int TotalClientes, int TotalPedidos,
@@ -111,7 +113,11 @@ public record DashboardResponse(
     int TamanhosEsgotados, int TamanhosEstoqueBaixo, int PedidosPendentesEnvio,
     IReadOnlyList<VendaCategoriaResponse> VendasPorCategoria,
     IReadOnlyList<MaisVendidoResponse> MaisVendidos,
-    decimal TotalJogaJunto = 0, int AvaliacoesPendentes = 0);
+    decimal TotalJogaJunto = 0, int AvaliacoesPendentes = 0,
+    IReadOnlyList<VendaCanalResponse>? VendasPorCanal = null);
+
+/// <summary>Identifica a API para o app encontrar a loja na rede Wi-Fi (GET /api/loja).</summary>
+public record LojaInfoResponse(string Loja, string Versao, string[] Recursos);
 
 public record ConsultaResponse(string Nome, string Descricao, IReadOnlyList<string> Colunas,
     IReadOnlyList<Dictionary<string, object?>> Linhas);

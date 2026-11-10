@@ -7,6 +7,7 @@ import '../modelos/modelos.dart';
 import '../servicos/api_cliente.dart';
 import '../servicos/servicos.dart';
 import '../widgets/comum.dart';
+import 'login_tela.dart';
 
 class ProdutoTela extends StatefulWidget {
   final int produtoId;
@@ -22,6 +23,7 @@ class _ProdutoTelaState extends State<ProdutoTela> {
   String? _tamanho;
   int _qtd = 1;
   int _foto = 0;
+  List<Avaliacao>? _avaliacoes;
 
   @override
   void initState() {
@@ -33,9 +35,105 @@ class _ProdutoTelaState extends State<ProdutoTela> {
     try {
       final d = await catalogo.detalhe(widget.produtoId);
       if (mounted) setState(() => _d = d);
+      _carregarAvaliacoes();
     } on ApiException catch (e) {
       if (mounted) setState(() => _erro = e.mensagem);
     }
+  }
+
+  Future<void> _carregarAvaliacoes() async {
+    try {
+      final lista = await avaliacoes.listar(widget.produtoId);
+      if (mounted) setState(() => _avaliacoes = lista);
+    } on ApiException {
+      if (mounted) setState(() => _avaliacoes = const []);
+    }
+  }
+
+  /// Mesma regra do site: só quem comprou o produto avalia (a API confere e explica se não puder).
+  Future<void> _avaliar() async {
+    if (!sessao.logado) {
+      final entrou = await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const LoginTela()));
+      if (entrou != true || !mounted) return;
+    }
+    var nota = 5;
+    final comentario = TextEditingController();
+    final enviar = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(
+        builder: (c, atualizar) => AlertDialog(
+          title: const Text('Avaliar produto'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              for (var i = 1; i <= 5; i++)
+                IconButton(
+                  tooltip: '$i estrela${i > 1 ? 's' : ''}',
+                  isSelected: i <= nota,
+                  onPressed: () => atualizar(() => nota = i),
+                  icon: Icon(i <= nota ? Icons.star : Icons.star_border, color: Cores.amarelo, size: 32),
+                ),
+            ]),
+            TextField(
+              controller: comentario,
+              maxLength: 500,
+              maxLines: 3,
+              decoration: const InputDecoration(labelText: 'Comentário (opcional)'),
+            ),
+          ]),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancelar')),
+            TextButton(onPressed: () => Navigator.pop(c, true), child: const Text('Enviar')),
+          ],
+        ),
+      ),
+    );
+    final texto = comentario.text;
+    comentario.dispose();
+    if (enviar != true) return;
+    try {
+      final msg = await avaliacoes.enviar(widget.produtoId, nota, texto);
+      if (mounted) mostrarMensagem(context, msg);
+      _carregarAvaliacoes();
+    } on ApiException catch (e) {
+      if (mounted) mostrarMensagem(context, e.mensagem, erro: true);
+    }
+  }
+
+  Widget _secaoAvaliacoes() {
+    final lista = _avaliacoes;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const SizedBox(height: 24),
+      Row(children: [
+        const Expanded(child: Text('Avaliações', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16))),
+        TextButton.icon(onPressed: _avaliar, icon: const Icon(Icons.rate_review_outlined), label: const Text('Avaliar')),
+      ]),
+      if (lista == null)
+        const Padding(padding: EdgeInsets.all(8), child: LinearProgressIndicator(color: Cores.amarelo))
+      else if (lista.isEmpty)
+        const Text('Ainda sem avaliações. Comprou? Conte o que achou.', style: TextStyle(color: Cores.textoSuave))
+      else
+        for (final a in lista.take(5))
+          Semantics(
+            label: '${a.cliente}, nota ${a.nota} de 5${a.comentario == null ? '' : ': ${a.comentario}'}',
+            excludeSemantics: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Text('★' * a.nota + '☆' * (5 - a.nota), style: const TextStyle(color: Cores.amarelo)),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(a.cliente, style: const TextStyle(fontWeight: FontWeight.w600))),
+                  Text(dataHora(a.data).split(' ').first, style: const TextStyle(color: Cores.textoSuave, fontSize: 12)),
+                ]),
+                if (a.comentario != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(a.comentario!, style: const TextStyle(color: Cores.textoSuave, height: 1.4)),
+                  ),
+              ]),
+            ),
+          ),
+    ]);
   }
 
   int _estoque(String t) => _d!.tamanhos.firstWhere((x) => x.tamanho == t, orElse: () => TamanhoEstoque(t, 0)).quantidade;
@@ -222,6 +320,7 @@ class _ProdutoTelaState extends State<ProdutoTela> {
               const SizedBox(height: 16),
               const Text('🚚 Frete grátis acima de R\$ 299  ·  🔁 Troca em 30 dias',
                   style: TextStyle(color: Cores.textoSuave, fontSize: 12)),
+              _secaoAvaliacoes(),
             ]),
           ),
         ],

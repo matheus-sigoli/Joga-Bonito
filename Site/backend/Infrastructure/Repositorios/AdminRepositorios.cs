@@ -90,6 +90,8 @@ public class RelatorioRepositorio : IRelatorioRepositorio
         ["mais-vendidos"] = ("View vw_ProdutosMaisVendidos", @"
             SELECT TOP 20 ProdutoId, Nome, Categoria, Linha, UnidadesVendidas, Receita
             FROM dbo.vw_ProdutosMaisVendidos ORDER BY UnidadesVendidas DESC, Receita DESC"),
+        ["vendas-por-canal"] = ("View vw_VendasPorCanal (site × app)", @"
+            SELECT Canal, Pedidos, Receita, Clientes FROM dbo.vw_VendasPorCanal ORDER BY Canal DESC"),
         ["auditoria-estoque"] = ("Tabela AuditoriaEstoque (alimentada por trigger)", @"
             SELECT TOP 100 A.Id, P.Nome AS Produto, A.Tamanho, A.QtdAnterior, A.QtdNova, A.OrigemOperacao,
                    CONVERT(VARCHAR(19), A.DataOperacao, 120) AS Data
@@ -219,7 +221,16 @@ public class RelatorioRepositorio : IRelatorioRepositorio
                     r.Int("UnidadesVendidas"), r.Dec("Receita")));
         }
 
+        var porCanal = new List<VendaCanalResponse>();
+        await using (var cmd = new SqlCommand(
+            "SELECT Canal, Pedidos, Receita, Clientes FROM dbo.vw_VendasPorCanal ORDER BY Canal DESC", con))
+        {
+            await using var r = await cmd.ExecuteReaderAsync();
+            while (await r.ReadAsync())
+                porCanal.Add(new VendaCanalResponse(r.Str("Canal"), r.Int("Pedidos"), r.Dec("Receita"), r.Int("Clientes")));
+        }
+
         return new DashboardResponse(totalProdutos, pecas, clientes, pedidos, faturamento, fat30, ticket30,
-            esgotados, baixos, pendentes, porCategoria, maisVendidos, jogaJunto, avaliacoesPendentes);
+            esgotados, baixos, pendentes, porCategoria, maisVendidos, jogaJunto, avaliacoesPendentes, porCanal);
     }
 }

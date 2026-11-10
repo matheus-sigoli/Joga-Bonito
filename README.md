@@ -33,6 +33,7 @@ Requisitos: **.NET 8 SDK** e um **SQL Server** (Express, instância padrão ou L
 | Arquivo | O que faz |
 |---|---|
 | `iniciar-projeto.bat` / atalho **Joga Bonito** | Liga a loja (se ainda não estiver no ar) e abre o login |
+| `iniciar-com-celular.bat` | Abre a loja também para o **app no celular** (mesmo Wi-Fi): libera o firewall só para a rede local e mostra o endereço. Fica lembrado; `iniciar-projeto.bat -SemRede` desfaz |
 | `parar-projeto.bat` | Desliga a API (necessário só para depurar pelo Visual Studio) |
 | `desligar-com-o-windows.bat` / `ligar-com-o-windows.bat` | Desliga ou religa o início automático |
 
@@ -46,7 +47,7 @@ Requisitos: **.NET 8 SDK** e um **SQL Server** (Express, instância padrão ou L
 
 **Visual Studio:** F5 abre a loja no login. Se aparecer "a porta já está em uso", a loja já está no ar pelo início automático: rode `parar-projeto.bat` antes de depurar.
 
-O log fica em `%LOCALAPPDATA%\JogaBonito\logs\api.log`. Para testar o app num **celular físico** na mesma rede: `iniciar-projeto.bat -Rede`.
+O log fica em `%LOCALAPPDATA%\JogaBonito\logs\api.log`. Para testar o app num **celular físico** na mesma rede: `iniciar-com-celular.bat` e, no app, **Conectar à loja › Procurar a loja na rede** (roteiro 5 em `Maestro/docs/qa/roteiros-manuais.md`).
 
 ### Opção 2 — Site público (Vercel), sem servidor
 Para divulgar a loja num link, há uma versão que roda inteira no navegador de quem visita:

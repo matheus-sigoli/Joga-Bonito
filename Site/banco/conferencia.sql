@@ -59,6 +59,14 @@ INSERT @R SELECT N'Avaliação só de quem comprou o produto na loja',
 INSERT @R SELECT N'Avaliação oculta tem moderador, data e motivo',
     (SELECT COUNT(1) FROM dbo.Avaliacoes WHERE Status = 'Oculta' AND (ModeradoPor IS NULL OR ModeradoEm IS NULL OR MotivoModeracao IS NULL));
 
+-- Canais de venda (site × app)
+INSERT @R SELECT N'Pedidos só com origem Web ou Mobile',
+    (SELECT COUNT(1) FROM dbo.Pedidos WHERE Origem NOT IN ('Web', 'Mobile'));
+INSERT @R SELECT N'Vendas por canal (vw_VendasPorCanal) somam o total dos pedidos não cancelados',
+    CASE WHEN (SELECT ISNULL(SUM(Receita), 0) FROM dbo.vw_VendasPorCanal)
+            = (SELECT ISNULL(SUM(ValorTotal), 0) FROM dbo.Pedidos WHERE StatusPedido <> 'Cancelado')
+         THEN 0 ELSE 1 END;
+
 -- Dados pessoais e segurança
 INSERT @R SELECT N'Endereços cifrados (AES-256-GCM, prefixo enc1:) ou anonimizados',
     (SELECT COUNT(1) FROM dbo.Enderecos WHERE Rua NOT LIKE 'enc1:%' AND Rua <> 'Removido (LGPD)');

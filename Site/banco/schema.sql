@@ -433,6 +433,20 @@ INNER JOIN dbo.Categorias C ON C.Id  = P.CategoriaId
 GROUP BY P.Id, P.Nome, C.Nome, P.Linha;
 GO
 
+-- vw_VendasPorCanal: site × app (coluna Pedidos.Origem), pedidos não cancelados.
+-- Os dois canais sempre aparecem, mesmo sem venda, para o painel comparar lado a lado.
+CREATE OR ALTER VIEW dbo.vw_VendasPorCanal
+AS
+SELECT
+    C.Origem                        AS Canal,
+    COUNT(PE.Id)                    AS Pedidos,
+    ISNULL(SUM(PE.ValorTotal), 0)   AS Receita,
+    COUNT(DISTINCT PE.UsuarioId)    AS Clientes
+FROM (VALUES ('Web'), ('Mobile')) AS C(Origem)
+LEFT JOIN dbo.Pedidos PE ON PE.Origem = C.Origem AND PE.StatusPedido <> 'Cancelado'
+GROUP BY C.Origem;
+GO
+
 -- ============================================================================
 -- PARTE 5 — TRIGGERS
 -- ============================================================================

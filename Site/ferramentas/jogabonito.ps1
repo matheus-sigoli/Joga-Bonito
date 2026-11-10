@@ -22,7 +22,8 @@ param(
     [ValidateSet('Iniciar', 'Parar', 'Reiniciar', 'Status', 'LigarComWindows', 'DesligarComWindows', 'Atalho')]
     [string]$Acao = 'Iniciar',
     [switch]$SemNavegador,      # não abre o navegador (início automático com o Windows)
-    [switch]$Rede,              # aceita conexões da rede local (celular físico com o app)
+    [switch]$Rede,              # aceita conexões da rede local (celular com o app); fica lembrado
+    [switch]$SemRede,           # volta a aceitar só este PC (esquece o modo rede)
     [switch]$Silencioso,        # sem perguntas (usa só o que já está instalado)
     [int]$Porta = 5000
 )
@@ -41,8 +42,17 @@ $PastaLogs = Join-Path $Dados 'logs'
 $ArqPid    = Join-Path $Dados 'api.pid'
 $ArqServ   = Join-Path $Dados 'servidor-sql.txt'
 $ArqVersao = Join-Path $PastaApi '.versao-codigo'
+$ArqRede   = Join-Path $Dados 'modo-rede.txt'      # existe = API aberta para a rede local (celular)
+$ArqBind   = Join-Path $Dados 'api-endereco.txt'   # endereço em que a API ligada está escutando
+$RegraFw   = 'Joga Bonito - API (rede local)'
 $Url       = "http://localhost:$Porta"
 New-Item -ItemType Directory -Force -Path $Dados, $PastaLogs | Out-Null
+
+# Modo rede lembrado: depois de um iniciar-com-celular.bat, o início com o Windows e o
+# iniciar-projeto.bat também abrem a API para o celular, até alguém usar -SemRede.
+if ($SemRede) { Remove-Item $ArqRede -ErrorAction SilentlyContinue; $Rede = $false }
+elseif ($Rede) { Set-Content -Path $ArqRede -Value (Get-Date -Format 's') -Encoding ASCII }
+elseif (Test-Path $ArqRede) { $Rede = $true }
 
 # ----------------------------------------------------------------- utilidades
 function Escrever([string]$texto, [string]$cor = 'Gray') { Write-Host $texto -ForegroundColor $cor }
@@ -99,7 +109,83 @@ function Resumo {
     Escrever '   Cliente      matheus@estudante.com /  Cliente@2026' 'Gray'
     Escrever "   Log da API   $PastaLogs\api.log" 'DarkGray'
     Escrever '   Desligar     parar-projeto.bat' 'DarkGray'
+    if ($Rede) {
+        Escrever '  ----------------------------------------------------------------' 'DarkGreen'
+        $ips = @(Enderecos-Rede)
+        if ($ips.Count -eq 0) {
+            Escrever '   CELULAR      sem rede Wi-Fi/cabo ativa neste PC' 'Yellow'
+        } else {
+            foreach ($ip in $ips) { Escrever "   CELULAR      http://${ip}:$Porta" 'Yellow' }
+            Escrever "   No app: Perfil > Servidor da API > 'Procurar a loja na rede'" 'Gray'
+            Escrever '   (o celular precisa estar no mesmo Wi-Fi deste PC)' 'DarkGray'
+        }
+        Escrever '   Só este PC   iniciar-projeto.bat -SemRede' 'DarkGray'
+    }
     Escrever '  ================================================================' 'DarkGreen'
+}
+
+# ------------------------------------------------------------ rede (celular)
+function Enderecos-Rede {
+    # IPv4 privados das placas de rede reais (Wi-Fi/cabo); ignora máquinas virtuais, WSL e Bluetooth
+    $ErrorActionPreference = 'Continue'
+    try {
+        Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
+            Where-Object {
+                $_.IPAddress -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)' -and
+                $_.InterfaceAlias -notmatch 'vEthernet|WSL|VirtualBox|VMware|Hyper-V|Loopback|Bluetooth|Docker' -and
+                $_.AddressState -eq 'Preferred'
+            } |
+            Sort-Object { if ($_.InterfaceAlias -match 'Wi-?Fi|Wireless|WLAN') { 0 } else { 1 } } |
+            ForEach-Object { $_.IPAddress }
+    } catch { }
+}
+
+function Executar-ComoAdministrador([string]$comando) {
+    # Abre o pedido de permissão do Windows (UAC) só para este comando
+    $bytes = [System.Text.Encoding]::Unicode.GetBytes($comando)
+    $codificado = [Convert]::ToBase64String($bytes)
+    try {
+        $p = Start-Process powershell -Verb RunAs -Wait -PassThru -WindowStyle Hidden `
+            -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $codificado"
+        return ($p.ExitCode -eq 0)
+    } catch {
+        return $false   # a pessoa clicou em "Não" no pedido de permissão
+    }
+}
+
+function Preparar-Rede {
+    $ErrorActionPreference = 'Continue'
+    Escrever ''
+    Escrever '  Preparando o acesso do celular (mesma rede Wi-Fi)' 'Cyan'
+
+    # 1. Firewall: libera a porta só para a rede local (LocalSubnet) e só em redes privadas/domínio
+    $regra = Get-NetFirewallRule -DisplayName $RegraFw -ErrorAction SilentlyContinue
+    if ($regra) {
+        Ok "Firewall do Windows já libera a porta $Porta para a rede local"
+    } elseif ($Silencioso) {
+        Aviso 'Firewall ainda não liberado: rode iniciar-com-celular.bat uma vez (pede permissão de administrador).'
+    } else {
+        Escrever "       O Windows vai pedir permissão de administrador para liberar a porta $Porta" 'Gray'
+        Escrever '       só para aparelhos da sua rede local (uma vez só).' 'Gray'
+        $cmd = "New-NetFirewallRule -DisplayName '$RegraFw' -Description 'Celular com o app Joga Bonito (PIM IV)' " +
+               "-Direction Inbound -Protocol TCP -LocalPort $Porta -Action Allow -Profile Private,Domain " +
+               "-RemoteAddress LocalSubnet | Out-Null"
+        if (Executar-ComoAdministrador $cmd) { Ok "Firewall liberado: porta $Porta, só rede local" }
+        else { Aviso "Firewall não liberado (permissão negada). O celular pode não conseguir entrar; rode de novo e clique em Sim." }
+    }
+
+    # 2. Wi-Fi marcado como "Rede pública": o Windows bloqueia tudo que vem de outros aparelhos
+    $publicas = @(Get-NetConnectionProfile -ErrorAction SilentlyContinue | Where-Object { $_.NetworkCategory -eq 'Public' })
+    foreach ($perfil in $publicas) {
+        Aviso "A rede '$($perfil.Name)' está como Pública: o Windows bloqueia o celular nela."
+        if ((-not $Silencioso) -and (Perguntar "       Marcar '$($perfil.Name)' como Rede privada? (só faça na sua casa/escola)")) {
+            $cmd = "Set-NetConnectionProfile -InterfaceIndex $($perfil.InterfaceIndex) -NetworkCategory Private"
+            if (Executar-ComoAdministrador $cmd) { Ok "Rede '$($perfil.Name)' marcada como privada" }
+            else { Aviso 'Não foi possível mudar. Em Configurações > Rede e Internet > Wi-Fi, escolha "Rede privada".' }
+        } else {
+            Escrever '       Para mudar depois: Configurações > Rede e Internet > Wi-Fi > Rede privada.' 'DarkGray'
+        }
+    }
 }
 
 # ------------------------------------------------------------------- .NET SDK
@@ -236,6 +322,7 @@ function Subir-Api([string]$servidor) {
     $psi.EnvironmentVariables['DOTNET_CLI_TELEMETRY_OPTOUT'] = '1'
     $p = [System.Diagnostics.Process]::Start($psi)
     Set-Content -Path $ArqPid -Value $p.Id -Encoding ASCII
+    Set-Content -Path $ArqBind -Value $ip -Encoding ASCII
     if ($Rede) { Aviso "API aberta para a rede local (porta $Porta). Use só em rede de confiança." }
 }
 
@@ -298,8 +385,26 @@ function Iniciar {
     Escrever '  JOGA BONITO - ligando a loja' 'Green'
     Escrever ''
     Organizar-Fotos
+    if ($Rede) { Preparar-Rede }
+
+    # A API ligada escuta no endereço certo? (ex.: ligou com o Windows só para este PC e agora é com celular)
+    $endereco = if (Test-Path $ArqBind) { (Get-Content $ArqBind | Select-Object -First 1) } else { 'localhost' }
+    $querido  = if ($Rede) { '0.0.0.0' } else { 'localhost' }
+    if ((Processo-Api) -and ($endereco -ne $querido)) {
+        if ($Rede) { Aviso 'A API estava aberta só para este PC: religando para a rede local...' }
+        else { Aviso 'A API estava aberta para a rede: religando só para este PC...' }
+        Parar -Quieto
+        Start-Sleep -Seconds 1
+    }
+
     $estado = Estado-Api
-    if ($estado -eq 'pronta') { Ok 'A API já está no ar'; Resumo; Abrir-Loja; return }
+    if ($estado -eq 'pronta') {
+        Ok 'A API já está no ar'
+        if ($Rede -and -not (Processo-Api)) {
+            Aviso 'Esta API não foi ligada pelo lançador (Visual Studio/VS Code?): o celular só entra se ela escutar em 0.0.0.0.'
+        }
+        Resumo; Abrir-Loja; return
+    }
 
     $dono = Porta-Ocupada
     if ($dono -and -not (Processo-Api)) {
@@ -372,6 +477,12 @@ function Status {
         default     { Aviso 'API desligada' }
     }
     if (Test-Path $ArqServ) { Escrever "  SQL Server: $(Get-Content $ArqServ)" }
+    if ($Rede) {
+        Escrever '  Celular (rede local): sim'
+        foreach ($ip in @(Enderecos-Rede)) { Escrever "    http://${ip}:$Porta" }
+        if (Get-NetFirewallRule -DisplayName $RegraFw -ErrorAction SilentlyContinue) { Escrever '  Firewall liberado: sim' }
+        else { Escrever '  Firewall liberado: não (rode iniciar-com-celular.bat)' }
+    } else { Escrever '  Celular (rede local): não' }
     $atalho = Join-Path ([Environment]::GetFolderPath('Startup')) 'Joga Bonito - API.lnk'
     if (Test-Path $atalho) { Escrever '  Liga sozinha com o Windows: sim' } else { Escrever '  Liga sozinha com o Windows: não' }
 }

@@ -134,10 +134,20 @@ jobs:
             echo "::warning::Variável URL_LOJA não definida: o APK usa o endereço de desenvolvimento (emulador)."
             flutter build apk --release
           fi
+          cp build/app/outputs/flutter-apk/app-release.apk ../joga-bonito-producao.apk
+      - name: APK rede local (celular + PC no mesmo Wi-Fi, API por HTTP na rede local)
+        run: |
+          dart run tool/preparar_android.dart --rede-local
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk ../joga-bonito-rede-local.apk
       - uses: actions/upload-artifact@v6
         with:
           name: app-android
-          path: Mobile/build/app/outputs/flutter-apk/app-release.apk
+          path: joga-bonito-producao.apk
+      - uses: actions/upload-artifact@v6
+        with:
+          name: app-android-rede-local
+          path: joga-bonito-rede-local.apk
 
   docker:
     name: Imagem Docker → GHCR

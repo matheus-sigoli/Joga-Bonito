@@ -208,3 +208,36 @@ class Pedido {
             .toList(),
       );
 }
+
+/// Avaliação publicada de um produto (GET /api/produtos/{id}/avaliacoes).
+class Avaliacao {
+  final String cliente;
+  final int nota;
+  final String? comentario;
+  final DateTime data;
+  const Avaliacao({required this.cliente, required this.nota, this.comentario, required this.data});
+
+  factory Avaliacao.fromJson(Map<String, dynamic> j) => Avaliacao(
+        cliente: j['cliente'] as String? ?? 'Cliente',
+        nota: (j['nota'] as num).toInt().clamp(1, 5),
+        comentario: (j['comentario'] as String?)?.trim().isEmpty ?? true ? null : (j['comentario'] as String).trim(),
+        data: DateTime.tryParse(j['data'] as String? ?? '') ?? DateTime.now(),
+      );
+}
+
+/// Endereço devolvido pelo ViaCEP (preenche o checkout).
+class EnderecoCep {
+  final String rua, bairro, cidade, uf;
+  const EnderecoCep({required this.rua, required this.bairro, required this.cidade, required this.uf});
+
+  /// null quando o ViaCEP responde {"erro": true} (CEP inexistente).
+  static EnderecoCep? fromViaCep(Map<String, dynamic> j) {
+    if (j['erro'] == true || j['erro'] == 'true') return null;
+    return EnderecoCep(
+      rua: j['logradouro'] as String? ?? '',
+      bairro: j['bairro'] as String? ?? '',
+      cidade: j['localidade'] as String? ?? '',
+      uf: j['uf'] as String? ?? '',
+    );
+  }
+}

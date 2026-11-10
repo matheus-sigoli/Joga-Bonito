@@ -462,6 +462,12 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
         Math.Round(relatorio.TotalDuration.TotalMilliseconds, 1)))
 });
 
+// O app procura a loja na rede Wi-Fi testando este endereço em cada aparelho da rede:
+// a resposta confirma que ali está a API da Joga Bonito (e não outro serviço na porta 5000).
+app.MapGet("/api/loja", () => Results.Ok(new LojaInfoResponse("Joga Bonito", "1.0",
+        new[] { "catalogo", "pedidos", "avaliacoes", "lgpd" })))
+   .WithTags("Loja").WithSummary("Identifica a API da Joga Bonito (usado pelo app para achar a loja na rede)");
+
 app.MapAuth();
 app.MapCatalogo();
 app.MapPedidos();

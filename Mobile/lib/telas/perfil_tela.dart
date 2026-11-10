@@ -1,11 +1,15 @@
 // ============================================================================
 // PERFIL — conta, sincronização e configuração do servidor da API.
 // ============================================================================
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../servicos/api_cliente.dart';
 import '../servicos/servicos.dart';
 import '../widgets/comum.dart';
+import '../widgets/conexao_dialogo.dart';
 import 'login_tela.dart';
 
 class PerfilTela extends StatefulWidget {
@@ -27,33 +31,55 @@ class _PerfilTelaState extends State<PerfilTela> {
   }
 
   Future<void> _configurarServidor() async {
-    final ctrl = TextEditingController(text: api.baseUrl);
-    final novo = await showDialog<String>(
+    if (await conectarLoja(context)) {
+      // Novo servidor: o catálogo offline antigo é de outra loja/versão
+      final d = await catalogo.ultimaSincronizacao();
+      if (mounted) setState(() => _sincronizado = d);
+    }
+    if (mounted) setState(() {});
+  }
+
+  /// LGPD (art. 18): mostra o que a loja guarda desta conta e permite copiar o JSON completo.
+  Future<void> _meusDados() async {
+    Map<String, dynamic> dados;
+    try {
+      dados = await sessao.meusDados();
+    } on ApiException catch (e) {
+      if (mounted) mostrarMensagem(context, e.mensagem, erro: true);
+      return;
+    }
+    if (!mounted) return;
+    final conta = (dados['conta'] as Map?) ?? const {};
+    int qtd(String chave) => (dados[chave] as List?)?.length ?? 0;
+    final json = const JsonEncoder.withIndent('  ').convert(dados);
+    await showDialog<void>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Servidor da API'),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(controller: ctrl, keyboardType: TextInputType.url, decoration: const InputDecoration(labelText: 'Endereço')),
-          const SizedBox(height: 10),
-          const Text('Emulador Android: http://10.0.2.2:5000\nCelular: http://IP-DO-PC:5000 (mesma rede Wi-Fi)\nPublicado: https://... (HTTPS obrigatório fora da rede local)',
-              style: TextStyle(fontSize: 12, color: Cores.textoSuave)),
-        ]),
+        title: const Text('Meus dados (LGPD)'),
+        content: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Nome: ${conta['nome'] ?? '-'}'),
+            Text('E-mail: ${conta['email'] ?? '-'}'),
+            const SizedBox(height: 8),
+            Text('Endereços: ${qtd('enderecos')} · Pedidos: ${qtd('pedidos')} · Avaliações: ${qtd('avaliacoes')}'),
+            Text('Registros de acesso: ${qtd('acessos')}'),
+            const SizedBox(height: 10),
+            Text(dados['observacao'] as String? ?? '', style: const TextStyle(fontSize: 12, color: Cores.textoSuave)),
+          ]),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(c, ctrl.text), child: const Text('Salvar')),
+          TextButton(
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: json));
+              if (c.mounted) Navigator.pop(c);
+              if (mounted) mostrarMensagem(context, 'Dados copiados (JSON). Cole num e-mail ou arquivo para guardar.');
+            },
+            child: const Text('Copiar tudo (JSON)'),
+          ),
+          TextButton(onPressed: () => Navigator.pop(c), child: const Text('Fechar')),
         ],
       ),
     );
-    ctrl.dispose();
-    if (novo == null || novo.trim().isEmpty) return;
-    try {
-      await api.alterarServidor(novo);
-      await api.get('/health/ready');
-      if (mounted) mostrarMensagem(context, 'Conectado a ${api.baseUrl}');
-    } on ApiException catch (e) {
-      if (mounted) mostrarMensagem(context, e.mensagem, erro: true);
-    }
-    if (mounted) setState(() {});
   }
 
   Future<void> _trocarSenha() async {
@@ -122,7 +148,7 @@ class _PerfilTelaState extends State<PerfilTela> {
         title: const Text('Excluir minha conta'),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           const Text('Apaga nome, e-mail, endereços e avaliações. Os pedidos ficam guardados sem dados pessoais '
-              '(obrigação fiscal). Não dá para desfazer. Para baixar seus dados antes, use o site: Meus pedidos › Meus dados.',
+              '(obrigação fiscal). Não dá para desfazer. Para guardar uma cópia antes, use Perfil › Meus dados.',
               style: TextStyle(fontSize: 13)),
           const SizedBox(height: 12),
           TextField(
@@ -197,9 +223,10 @@ class _PerfilTelaState extends State<PerfilTela> {
               ),
               const SizedBox(height: 12),
               ListTile(
-                leading: const Icon(Icons.dns_outlined),
-                title: const Text('Servidor da API'),
-                subtitle: Text(api.baseUrl),
+                leading: const Icon(Icons.wifi_find),
+                title: const Text('Conectar à loja'),
+                subtitle: Text('${api.baseUrl}\nProcurar o PC na rede Wi-Fi ou digitar o endereço'),
+                isThreeLine: true,
                 onTap: _configurarServidor,
               ),
               ListTile(
@@ -214,6 +241,13 @@ class _PerfilTelaState extends State<PerfilTela> {
                 title: Text('Acessibilidade'),
                 subtitle: Text('O app respeita o tamanho de fonte e o leitor de tela (TalkBack/VoiceOver) do aparelho.'),
               ),
+              if (u != null)
+                ListTile(
+                  leading: const Icon(Icons.download_outlined),
+                  title: const Text('Meus dados (LGPD)'),
+                  subtitle: const Text('Veja e copie tudo o que a loja guarda da sua conta'),
+                  onTap: _meusDados,
+                ),
               if (u != null)
                 ListTile(
                   leading: const Icon(Icons.lock_outline),

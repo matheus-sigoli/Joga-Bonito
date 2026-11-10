@@ -97,6 +97,18 @@
             </div>`).join("")
         : '<p class="texto-suave">Sem vendas no período.</p>';
 
+      const canais = d.vendasPorCanal || [];
+      const totalCanais = canais.reduce((s, c) => s + c.receita, 0);
+      const nomeCanal = { Web: "Site", Mobile: "App (celular)" };
+      $("vendas-canal").innerHTML = canais.length
+        ? canais.map(c => `
+            <div class="barra-cat">
+              <div class="barra-cat-topo"><span>${JB.esc(nomeCanal[c.canal] || c.canal)}</span><strong>${JB.brl(c.receita)}</strong></div>
+              <div class="barra"><i style="width:${totalCanais ? (c.receita / totalCanais) * 100 : 0}%"></i></div>
+              <small class="texto-suave">${c.pedidos} pedido(s) · ${c.clientes} cliente(s)${totalCanais ? ` · ${Math.round((c.receita / totalCanais) * 100)}%` : ""}</small>
+            </div>`).join("")
+        : '<p class="texto-suave">Sem vendas ainda.</p>';
+
       $("mais-vendidos").innerHTML = d.maisVendidos.length
         ? d.maisVendidos.map(m => `<li><span>${JB.esc(m.nome)}</span><small class="texto-suave">${m.unidades} un · ${JB.brl(m.receita)}</small></li>`).join("")
         : '<li class="texto-suave">Sem vendas ainda.</li>';

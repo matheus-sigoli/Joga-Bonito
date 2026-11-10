@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../modelos/modelos.dart';
@@ -88,6 +89,10 @@ class SessaoServico extends ChangeNotifier {
     await api.post('/api/auth/excluir-conta', {'senha': senha});
     await sair();
   }
+
+  /// GET /api/auth/meus-dados — LGPD: tudo o que a loja guarda desta conta (JSON).
+  Future<Map<String, dynamic>> meusDados() async =>
+      await api.get('/api/auth/meus-dados') as Map<String, dynamic>;
 
   /// POST /api/auth/sair-de-todos — invalida o token em todos os aparelhos.
   Future<void> sairDeTodos() async {
@@ -255,8 +260,55 @@ class PedidoServico {
   Future<void> cancelar(int id) => api.post('/api/pedidos/$id/cancelar');
 }
 
+// ----------------------------------------------------------------------------
+// AVALIAÇÕES — as mesmas do site: só quem comprou avalia; texto com link ou termo
+// bloqueado vai para a moderação do painel antes de aparecer.
+// ----------------------------------------------------------------------------
+class AvaliacaoServico {
+  Future<List<Avaliacao>> listar(int produtoId) async => (await api.get('/api/produtos/$produtoId/avaliacoes') as List)
+      .map((e) => Avaliacao.fromJson(e as Map<String, dynamic>))
+      .toList();
+
+  /// Devolve a mensagem da API ("Obrigado pela avaliação!" ou "...depois de revisada pela equipe.").
+  Future<String> enviar(int produtoId, int nota, String? comentario) async {
+    final r = await api.post('/api/produtos/$produtoId/avaliacoes', {
+      'nota': nota,
+      'comentario': (comentario ?? '').trim().isEmpty ? null : comentario!.trim(),
+    }) as Map<String, dynamic>;
+    return r['mensagem'] as String? ?? 'Avaliação enviada.';
+  }
+}
+
+// ----------------------------------------------------------------------------
+// CEP — ViaCEP (o mesmo serviço que o site usa) para preencher o endereço.
+// ----------------------------------------------------------------------------
+class CepServico {
+  /// Só dígitos; null se não tiver 8.
+  static String? normalizar(String cep) {
+    final d = cep.replaceAll(RegExp(r'\D'), '');
+    return d.length == 8 ? d : null;
+  }
+
+  /// null quando o CEP não existe ou o ViaCEP não respondeu (a pessoa digita à mão).
+  Future<EnderecoCep?> buscar(String cep) async {
+    final limpo = normalizar(cep);
+    if (limpo == null) return null;
+    try {
+      final r = await http
+          .get(Uri.parse('https://viacep.com.br/ws/$limpo/json/'))
+          .timeout(const Duration(seconds: 6));
+      if (r.statusCode != 200) return null;
+      return EnderecoCep.fromViaCep(jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
 // Instâncias únicas compartilhadas pelas telas
 final sessao = SessaoServico();
 final carrinho = CarrinhoServico();
 final catalogo = CatalogoServico();
 final pedidos = PedidoServico();
+final avaliacoes = AvaliacaoServico();
+final cep = CepServico();
