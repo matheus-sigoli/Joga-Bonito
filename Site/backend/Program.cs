@@ -196,7 +196,7 @@ builder.Services.AddAuthorization(o => o.AddPolicy("Admin", p => p.RequireRole("
 // navegador, então não depende de CORS.
 builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
 {
-    var cabecalhos = new[] { "Authorization", "Content-Type", CookieSessao.CabecalhoCsrf, CookieSessao.CabecalhoCliente };
+    var cabecalhos = new[] { "Authorization", "Content-Type", CookieSessao.CabecalhoCsrf, CookieSessao.CabecalhoCliente, "Idempotency-Key" };
     if (origensCors.Length > 0)
         p.WithOrigins(origensCors).WithHeaders(cabecalhos).WithMethods("GET", "POST", "PUT", "DELETE").AllowCredentials();
     else if (builder.Environment.IsDevelopment())

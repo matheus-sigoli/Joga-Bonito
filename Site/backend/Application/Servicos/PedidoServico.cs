@@ -67,7 +67,9 @@ public class PedidoServico
     }
 
     /// <summary>Fecha o pedido. A gravação é atômica na procedure sp_RegistrarPedido.</summary>
-    public async Task<PedidoCriadoResponse> CriarAsync(int usuarioId, CriarPedidoRequest request)
+    /// <param name="chaveIdempotencia">Uma por tentativa de compra (cabeçalho Idempotency-Key): se a conexão cair
+    /// depois da gravação e o cliente reenviar, recebe o MESMO pedido em vez de comprar duas vezes.</param>
+    public async Task<PedidoCriadoResponse> CriarAsync(int usuarioId, CriarPedidoRequest request, Guid? chaveIdempotencia = null)
     {
         if (!FormasPagamento.Contains(request.FormaPagamento))
             throw new RegraNegocioException("Forma de pagamento inválida.");
@@ -89,7 +91,7 @@ public class PedidoServico
         var origem = string.Equals(request.Origem, "Mobile", StringComparison.OrdinalIgnoreCase) ? "Mobile" : "Web";
         var criado = await _pedidos.RegistrarAsync(usuarioId,
             request with { Parcelas = parcelas, Origem = origem, Cupom = request.Cupom?.Trim().ToUpperInvariant() },
-            enderecoId);
+            enderecoId, chaveIdempotencia);
         _cache.Invalidar(); // a trigger baixou o estoque: a vitrine precisa refletir
         return criado;
     }

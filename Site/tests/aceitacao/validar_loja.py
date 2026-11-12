@@ -30,6 +30,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import uuid
 from urllib.parse import urlencode, urlparse
 
 # ----------------------------------------------------------------- relatório
@@ -332,6 +333,26 @@ def main() -> int:
         if checar("mesma peça em duas linhas vira um item só", st == 201 and saldo(anonimo, 13, tam) == antes - 2, f"{st} {msg(p2)}"):
             st, _, _ = cli.post(f"/api/pedidos/{p2['pedidoId']}/cancelar")
             checar("cancelamento devolve as duas peças", st == 204 and saldo(anonimo, 13, tam) == antes, f"{st}")
+
+        # Idempotência: a resposta do pedido se perdeu (Wi-Fi caiu, PC lento) e o cliente confirmou de
+        # novo com a MESMA chave. Tem de voltar o mesmo pedido, sem baixar o estoque duas vezes.
+        chave = {"Idempotency-Key": str(uuid.uuid4())}
+        st1, a, _ = cli.post("/api/pedidos", pedido(13, tam, 1), cabecalhos=chave)
+        st2, b, _ = cli.post("/api/pedidos", pedido(13, tam, 1), cabecalhos=chave)
+        if st1 == 201:
+            pedidos_abertos.append((cli, a["pedidoId"]))
+        if st2 == 201 and b.get("pedidoId") != a.get("pedidoId"):
+            pedidos_abertos.append((cli, b["pedidoId"]))
+        checar("reenvio com a mesma Idempotency-Key devolve o mesmo pedido",
+               st1 == 201 and st2 == 201 and a.get("pedidoId") == b.get("pedidoId"), f"{st1}/{st2} {a.get('pedidoId')} x {b.get('pedidoId')}")
+        checar("reenvio não baixa o estoque de novo", saldo(anonimo, 13, tam) == antes - 1, f"antes {antes}")
+        st3, c, _ = cli.post("/api/pedidos", pedido(13, tam, 1), cabecalhos={"Idempotency-Key": str(uuid.uuid4())})
+        if st3 == 201:
+            pedidos_abertos.append((cli, c["pedidoId"]))
+        checar("chave nova = compra nova", st3 == 201 and c.get("pedidoId") != a.get("pedidoId"), f"{st3}")
+        for pid_extra in {a.get("pedidoId"), c.get("pedidoId")} - {None}:
+            if cli.post(f"/api/pedidos/{pid_extra}/cancelar")[0] == 204:
+                pedidos_abertos[:] = [x for x in pedidos_abertos if x[1] != pid_extra]
 
         st, r, _ = cli.post("/api/pedidos", pedido(13, tam, 999))
         checar("compra acima do estoque é recusada", st == 400, f"{st} {msg(r)}")

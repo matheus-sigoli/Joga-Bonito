@@ -21,3 +21,6 @@ Site/IMG/Produtos/_originais/
 *.docx
 *.pdf
 *.xlsx
+
+# Python
+__pycache__/

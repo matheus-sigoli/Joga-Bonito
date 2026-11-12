@@ -125,10 +125,10 @@ const JB = (() => {
     }
   }
 
-  async function api(caminho, { metodo = "GET", corpo, autenticado = false, timeout = 10000 } = {}) {
+  async function api(caminho, { metodo = "GET", corpo, autenticado = false, timeout = 10000, cabecalhos = {} } = {}) {
     // X-JB-Requisicao: prova de que a chamada saiu do próprio site (proteção CSRF na API)
     // X-JB-Cliente: o login devolve a sessão em cookie HttpOnly, não no corpo
-    const headers = { Accept: "application/json", "X-JB-Requisicao": "1", "X-JB-Cliente": "web" };
+    const headers = { ...cabecalhos, Accept: "application/json", "X-JB-Requisicao": "1", "X-JB-Cliente": "web" };
     if (corpo !== undefined) headers["Content-Type"] = "application/json";
     const logado = sessao.logado();
     if (autenticado && !logado) throw new ErroApi("Faça login para continuar.", 401);

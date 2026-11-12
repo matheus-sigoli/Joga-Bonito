@@ -70,7 +70,7 @@ public interface IPedidoRepositorio
 {
     Task<Cupom?> ObterCupomAsync(string codigo);
     Task<int> InserirEnderecoAsync(int usuarioId, EnderecoRequest endereco);
-    Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId);
+    Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId, Guid? chaveIdempotencia = null);
     Task<IReadOnlyList<PedidoResponse>> ListarPorUsuarioAsync(int usuarioId);
     Task<IReadOnlyList<PedidoResponse>> ListarTodosAsync(string? status, int limite);
     Task<PedidoResponse?> ObterAsync(int pedidoId);

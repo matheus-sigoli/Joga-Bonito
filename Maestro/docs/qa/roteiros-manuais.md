@@ -2,6 +2,36 @@
 
 Marque cada item e anote quem testou e em qual aparelho/navegador.
 
+## Execução de 11/11/2026 (PC do Matheus: Windows, SQL Server Express, Wi-Fi 192.168.1.x)
+
+Feita pelo Claude no PC, com o navegador embutido do app e o SSMS. O PC estava muito carregado
+(até `/health/live` levou 2 s), o que revelou três falhas, corrigidas no mesmo dia (ADR 010).
+
+| Roteiro | Item | Resultado |
+|---|---|---|
+| 4 | `iniciar-projeto.bat`: .NET, SQL Express, compila, sincroniza catálogo e mostra o resumo | OK |
+| 4 | Segunda execução com a API ligada: só abre o navegador | OK |
+| 4 | `parar-projeto.bat` desliga a API | OK |
+| 4 | Atalho "Joga Bonito" na área de trabalho e início com o Windows | OK (criados na primeira execução) |
+| 4 | `iniciar-com-celular.bat`: firewall só rede local, religa a API em 0.0.0.0, `CELULAR http://192.168.1.166:5000` | OK |
+| 4 | `catalogo-local.js` alterado com a loja ligada: preço novo na API | OK (volta ao original em 4 s) |
+| 4 | Status com o PC lento dizia "API desligada"; início podia falhar em 3 min | **Corrigido**: estado "respondendo devagar", espera de 6 min |
+| 7 | Local Storage sem token; `jb_sessao` invisível ao JavaScript (HttpOnly); SameSite=Strict no código | OK |
+| 7 | SSMS: endereços `enc1:...`; e-mail mascarado para login sem UNMASK | OK |
+| 7 | `conferencia.sql`: 24 de 25 (a 25ª, "contas de demonstração ausentes", só vale em PROD); `vw_VendasPorCanal` Web × Mobile | OK |
+| 2 | Inicial: "Pular para o conteúdo" no 1º Tab; abas Campo/Society/Futsal com setas | OK |
+| 2 | Produto só com teclado (tamanho, quantidade, adicionar; anúncio no leitor de tela); guia de medidas fecha com Esc | OK |
+| 2 | Checkout sem mouse: CEP preenche o endereço, Esc fecha e devolve o foco | OK |
+| 2 | Checkout: o foco saía da janela ao passar para Pagamento | **Corrigido** (teste E2E `test_08` cobre) |
+| 2 | Pedido gravado quando o site desistia de esperar (risco de compra duplicada) | **Corrigido**: `Idempotency-Key` (validado no SQL Server real: 3 envios = 1 pedido) |
+| 2 | Painel admin: abas com setas/Home/End, ajuste de estoque (vai para a auditoria) e moderação só com teclado | OK |
+| 2 | Alto contraste + A+ (140%) em todas as páginas, 1280 px e 375 px | **Corrigido**: abas de piso e e-mail da Privacidade passavam da tela no celular |
+| 2 | VLibras carregado nas 10 páginas, incluindo produto, carrinho e admin | OK |
+| 6 | Site público: nenhuma chamada para localhost nem para a API | OK |
+
+Ficam para o grupo: roteiro 5 e 1 (celular real e TalkBack), NVDA (não instalado no PC), reiniciar o PC,
+Visual Studio F5 e `-SemRede` (precisa de argumento na linha de comando).
+
 ## 1. Leitor de tela no app (TalkBack no Android, VoiceOver no iOS)
 Ligue o leitor (Android: Configurações › Acessibilidade › TalkBack; iPhone: Ajustes › Acessibilidade › VoiceOver).
 

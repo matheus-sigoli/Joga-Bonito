@@ -169,6 +169,8 @@ class _CheckoutTelaState extends State<CheckoutTela> {
   String? _cupomAplicado;
   String? _erro;
   bool _enviando = false;
+  // Uma chave por tentativa de compra: confirmar de novo depois de erro de rede não duplica o pedido.
+  final String _chaveCompra = PedidoServico.novaChave();
 
   @override
   void initState() {
@@ -219,6 +221,7 @@ class _CheckoutTelaState extends State<CheckoutTela> {
           'cidade': _c['cidade']!.text.trim(),
           'estado': _c['uf']!.text.trim().toUpperCase(),
         },
+        chaveIdempotencia: _chaveCompra,
       );
       await carrinho.limpar();
       if (!mounted) return;

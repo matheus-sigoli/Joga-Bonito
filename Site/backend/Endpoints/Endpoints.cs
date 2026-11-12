@@ -140,10 +140,13 @@ public static class PedidoEndpoints
         g.MapPost("/simular", async (SimularPedidoRequest req, PedidoServico s) => Results.Ok(await s.SimularAsync(req)))
          .WithSummary("Calcula subtotal, desconto, frete e total sem gravar");
 
-        g.MapPost("", async (CriarPedidoRequest req, ClaimsPrincipal user, PedidoServico s) =>
+        g.MapPost("", async (CriarPedidoRequest req, ClaimsPrincipal user, PedidoServico s, HttpRequest http) =>
             {
+                // Idempotency-Key (opcional): o site e o app mandam uma por tentativa de compra.
+                // Reenvio da mesma tentativa (a resposta se perdeu no caminho) devolve o mesmo pedido.
+                Guid? chave = Guid.TryParse(http.Headers["Idempotency-Key"].ToString(), out var k) ? k : null;
                 // O id do comprador vem do TOKEN, nunca do corpo da requisição
-                var criado = await s.CriarAsync(user.UsuarioId(), req);
+                var criado = await s.CriarAsync(user.UsuarioId(), req, chave);
                 return Results.Created($"/api/pedidos/{criado.PedidoId}", criado);
             })
          .RequireRateLimiting("checkout")

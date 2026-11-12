@@ -94,16 +94,19 @@ class ApiCliente {
   }
 
   Future<dynamic> get(String caminho) => _enviar('GET', caminho);
-  Future<dynamic> post(String caminho, [Object? corpo]) => _enviar('POST', caminho, corpo);
+  Future<dynamic> post(String caminho, [Object? corpo, Map<String, String>? cabecalhos, Duration? limite]) =>
+      _enviar('POST', caminho, corpo, cabecalhos, limite);
   Future<dynamic> put(String caminho, [Object? corpo]) => _enviar('PUT', caminho, corpo);
 
-  Future<dynamic> _enviar(String metodo, String caminho, [Object? corpo]) async {
+  Future<dynamic> _enviar(String metodo, String caminho,
+      [Object? corpo, Map<String, String>? cabecalhos, Duration? limite]) async {
     if (token != null && tokenExpiraEm != null && tokenExpiraEm!.isBefore(DateTime.now())) {
       aoExpirarSessao?.call();
       throw const ApiException('Sua sessão expirou. Entre novamente.', 401);
     }
     final uri = Uri.parse('$baseUrl$caminho');
     final headers = <String, String>{
+      ...?cabecalhos,
       'Accept': 'application/json',
       if (corpo != null) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -113,7 +116,7 @@ class ApiCliente {
     try {
       final req = http.Request(metodo, uri)..headers.addAll(headers);
       if (corpo != null) req.body = jsonEncode(corpo);
-      resp = await http.Response.fromStream(await req.send().timeout(const Duration(seconds: 12)));
+      resp = await http.Response.fromStream(await req.send().timeout(limite ?? const Duration(seconds: 12)));
     } on TimeoutException {
       throw const ApiException('O servidor demorou para responder. Tente de novo.', 0);
     } catch (_) {

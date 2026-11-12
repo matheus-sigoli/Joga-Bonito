@@ -190,7 +190,7 @@ public class PedidoServicoTests
     {
         public Task<Cupom?> ObterCupomAsync(string codigo) => Task.FromResult<Cupom?>(null);
         public Task<int> InserirEnderecoAsync(int usuarioId, EnderecoRequest endereco) => throw new NotImplementedException();
-        public Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId) => throw new NotImplementedException();
+        public Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId, Guid? chaveIdempotencia = null) => throw new NotImplementedException();
         public Task<IReadOnlyList<PedidoResponse>> ListarPorUsuarioAsync(int usuarioId) => throw new NotImplementedException();
         public Task<IReadOnlyList<PedidoResponse>> ListarTodosAsync(string? status, int limite) => throw new NotImplementedException();
         public Task<PedidoResponse?> ObterAsync(int pedidoId) => throw new NotImplementedException();

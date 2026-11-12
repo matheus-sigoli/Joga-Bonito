@@ -62,7 +62,7 @@ http.createServer((req, res) => {
     if (req.method === "OPTIONS") {
       if (cab["Access-Control-Allow-Origin"]) {
         cab["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE";
-        cab["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-JB-Requisicao, X-JB-Cliente";
+        cab["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-JB-Requisicao, X-JB-Cliente, Idempotency-Key";
       }
       res.writeHead(204, cab); return res.end();
     }

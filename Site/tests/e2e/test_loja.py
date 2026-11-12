@@ -227,8 +227,11 @@ class TesteLoja(unittest.TestCase):
                              "bairro": "Bela Vista", "cidade": "São Paulo", "uf": "SP"}.items():
             self.pagina.fill(f"#{campo}", valor)
         self.pagina.click("#etapa-1 button[type=submit]")
+        # Teclado/leitor de tela: o foco vai para a forma de pagamento, não sai da janela (ADR 010)
+        expect(self.pagina.locator(".metodo.selecionado")).to_be_focused()
         self.pagina.click("#confirmar-pagamento")
         expect(self.pagina.locator("#sucesso-numero")).to_contain_text("1")
+        expect(self.pagina.locator("#etapa-3 h3")).to_be_focused()
         self.abrir("pedidos.html")
         expect(self.pagina.locator("#lista-pedidos")).to_contain_text("Camisa Brasil 1994 Retrô")
 

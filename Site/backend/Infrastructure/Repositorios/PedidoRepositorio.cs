@@ -59,7 +59,7 @@ public class PedidoRepositorio : IPedidoRepositorio
         return Convert.ToInt32(await TraduzirErrosAsync(() => cmd.ExecuteScalarAsync()));
     }
 
-    public async Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId)
+    public async Task<PedidoCriadoResponse> RegistrarAsync(int usuarioId, CriarPedidoRequest pedido, int? enderecoId, Guid? chaveIdempotencia = null)
     {
         var itensJson = JsonSerializer.Serialize(pedido.Itens.Select(i => new
         {
@@ -84,13 +84,31 @@ public class PedidoRepositorio : IPedidoRepositorio
         {
             Direction = System.Data.ParameterDirection.Output
         });
+        cmd.Parameters.Add(new SqlParameter("@ChaveIdempotencia", System.Data.SqlDbType.UniqueIdentifier)
+        {
+            Value = (object?)chaveIdempotencia ?? DBNull.Value
+        });
 
-        return await TraduzirErrosAsync(async () =>
+        async Task<PedidoCriadoResponse> Executar()
         {
             await using var r = await cmd.ExecuteReaderAsync();
             if (!await r.ReadAsync()) throw new InvalidOperationException("A procedure não retornou o pedido.");
             return new PedidoCriadoResponse(r.Int("Id"), r.Str("CodigoRastreio"), r.Dec("Subtotal"),
                 r.Dec("Desconto"), r.Dec("Frete"), r.Dec("ValorTotal"), r.Str("StatusPedido"), r.Dec("ValorJogaJunto"));
+        }
+
+        return await TraduzirErrosAsync(async () =>
+        {
+            try
+            {
+                return await Executar();
+            }
+            catch (SqlException ex) when (chaveIdempotencia is not null && ex.Number is 2601 or 2627)
+            {
+                // Duas cópias da mesma tentativa chegaram juntas: a outra gravou primeiro.
+                // Rodando de novo, a procedure encontra a chave e devolve o pedido já gravado.
+                return await Executar();
+            }
         });
     }
 

@@ -3,6 +3,7 @@
 // Sessão e carrinho são ChangeNotifier: as telas se atualizam sozinhas.
 // ============================================================================
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -243,6 +244,7 @@ class PedidoServico {
     required int parcelas,
     String? cupom,
     required Map<String, dynamic> endereco,
+    String? chaveIdempotencia,
   }) async =>
       await api.post('/api/pedidos', {
         'itens': itens,
@@ -251,7 +253,20 @@ class PedidoServico {
         'cupom': cupom,
         'endereco': endereco,
         'origem': 'Mobile',
-      }) as Map<String, dynamic>;
+      }, {
+        if (chaveIdempotencia != null) 'Idempotency-Key': chaveIdempotencia,
+      }, const Duration(seconds: 30)) as Map<String, dynamic>;
+
+  /// Chave de idempotência (UUID v4): uma por tentativa de compra. Se a resposta do pedido
+  /// se perder (Wi-Fi caiu, PC lento) e a pessoa confirmar de novo, a API devolve o MESMO pedido.
+  static String novaChave() {
+    final r = Random.secure();
+    final b = List<int>.generate(16, (_) => r.nextInt(256));
+    b[6] = (b[6] & 0x0f) | 0x40;
+    b[8] = (b[8] & 0x3f) | 0x80;
+    final h = b.map((x) => x.toRadixString(16).padLeft(2, '0')).join();
+    return '${h.substring(0, 8)}-${h.substring(8, 12)}-${h.substring(12, 16)}-${h.substring(16, 20)}-${h.substring(20)}';
+  }
 
   Future<List<Pedido>> meus() async => (await api.get('/api/pedidos/meus') as List)
       .map((e) => Pedido.fromJson(e as Map<String, dynamic>))

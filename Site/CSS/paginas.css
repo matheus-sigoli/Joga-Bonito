@@ -119,8 +119,9 @@
 .grade-piso { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 24px; }
 @media (max-width: 860px) {
   .piso-painel { grid-template-columns: 1fr; }
-  .piso-escolha { display: flex; }
-  .piso-escolha button { flex: 1; padding: 0 8px; }
+  /* flex-wrap: com fonte ampliada (A+ até 140%) as três abas não cabem lado a lado num celular */
+  .piso-escolha { display: flex; flex-wrap: wrap; }
+  .piso-escolha button { flex: 1 1 auto; padding: 0 8px; }
   .piso-sola .sola { height: 240px; }
 }
 
@@ -351,7 +352,8 @@
 .pagina-auth .rodape { margin-top: 0; }
 @media (max-width: 860px) { .auth { grid-template-columns: 1fr; } .auth-foto { min-height: 220px; } }
 
-.texto-legal { max-width: 760px; }
+.texto-legal { overflow-wrap: anywhere; /* e-mails e links longos quebram no celular com fonte grande */
+  max-width: 760px; }
 .texto-legal .titulo-secao { margin-top: 32px; }
 .texto-legal h2 { font-size: 1.2rem; margin: 32px 0 8px; color: var(--amarelo); }
 .texto-legal p { color: var(--texto-suave); }

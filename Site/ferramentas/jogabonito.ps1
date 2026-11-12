@@ -67,9 +67,10 @@ function Perguntar([string]$pergunta) {
 }
 
 function Estado-Api {
-    # 'pronta' | 'preparando' | 'falhou:<motivo>' | 'fora'
+    # 'pronta' | 'preparando' | 'lenta' | 'falhou:<motivo>' | 'fora'
+    # 'lenta' = a API responde (/health/live) mas o /health/ready passou do tempo: PC ocupado, não desligada.
     try {
-        $r = Invoke-WebRequest -Uri "$Url/health/ready" -UseBasicParsing -TimeoutSec 4
+        $r = Invoke-WebRequest -Uri "$Url/health/ready" -UseBasicParsing -TimeoutSec 10
         if ($r.StatusCode -eq 200) { return 'pronta' }
     } catch {
         $resp = $_.Exception.Response
@@ -82,6 +83,10 @@ function Estado-Api {
             } catch { }
             return 'preparando'
         }
+        try {
+            $vivo = Invoke-WebRequest -Uri "$Url/health/live" -UseBasicParsing -TimeoutSec 5
+            if ($vivo.StatusCode -eq 200) { return 'lenta' }
+        } catch { }
     }
     return 'fora'
 }
@@ -328,10 +333,17 @@ function Subir-Api([string]$servidor) {
 
 function Esperar-Api {
     Write-Host '  ...  preparando banco e catálogo ' -NoNewline -ForegroundColor Cyan
-    $limite = (Get-Date).AddMinutes(3)
+    $limite = (Get-Date).AddMinutes(6)
+    $avisouLenta = $false
     while ((Get-Date) -lt $limite) {
         $estado = Estado-Api
         if ($estado -eq 'pronta') { Write-Host ''; Ok 'API pronta (banco criado e catálogo sincronizado)'; return }
+        if ($estado -eq 'lenta' -and -not $avisouLenta) {
+            Write-Host ''
+            Aviso 'O computador está ocupado e a API está respondendo devagar. Aguardando...'
+            Write-Host '  ...  ' -NoNewline -ForegroundColor Cyan
+            $avisouLenta = $true
+        }
         if ($estado -like 'falhou:*') {
             Write-Host ''
             Falha "O banco não ficou pronto: $($estado.Substring(7))"
@@ -348,7 +360,7 @@ function Esperar-Api {
         Start-Sleep -Seconds 2
     }
     Write-Host ''
-    throw "A API demorou mais de 3 minutos para ficar pronta. Veja $PastaLogs\api.log"
+    throw "A API demorou mais de 6 minutos para ficar pronta. Veja $PastaLogs\api.log"
 }
 
 function Porta-Ocupada {
@@ -473,6 +485,7 @@ function Status {
     switch -Wildcard ($estado) {
         'pronta'    { Ok "Loja no ar em $Url" }
         'preparando'{ Aviso 'API ligada, preparando o banco...' }
+        'lenta'     { Aviso "API ligada em $Url, mas respondendo devagar (computador ocupado)" }
         'falhou:*'  { Falha "API ligada, mas o banco falhou: $($estado.Substring(7))" }
         default     { Aviso 'API desligada' }
     }

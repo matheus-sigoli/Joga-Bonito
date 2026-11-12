@@ -267,6 +267,12 @@
       if (p === "/api/pedidos/simular") { precisa(); return [200, simular(b.itens, b.cupom)]; }
       if (p === "/api/pedidos" && m === "POST") {
         precisa();
+        // Idempotency-Key: reenvio da mesma tentativa de compra devolve o mesmo pedido (como a sp_RegistrarPedido)
+        const chave = String(req.headers["idempotency-key"] || "").toLowerCase();
+        const valida = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(chave);
+        const repetido = valida && pedidos.find(x => x.usuarioId === u.id && x.chaveIdempotencia === chave);
+        if (repetido) return [201, { pedidoId: repetido.id, codigoRastreio: repetido.codigoRastreio, subtotal: repetido.subtotal,
+          desconto: repetido.desconto, frete: repetido.frete, total: repetido.total, status: repetido.status, jogaJunto: repetido.jogaJunto }];
         const s = simular(b.itens, b.cupom);
         const id = pedidos.length + 1, agora = new Date().toISOString();
         if (b.endereco) enderecos.push({ usuarioId: u.id, ...b.endereco });
@@ -281,6 +287,7 @@
           codigoRastreio: `JB${String(id).padStart(9, "0")}BR`, origem: b.origem || "Web", subtotal: s.subtotal, desconto: s.desconto,
           frete: s.frete, total: s.total, cliente: u.nome, itens: s.itens, historico: [{ status: "Pago", data: agora }] });
         pedidos[0].jogaJunto = s.jogaJunto;
+        if (valida) pedidos[0].chaveIdempotencia = chave;
         return [201, { pedidoId: id, codigoRastreio: pedidos[0].codigoRastreio, subtotal: s.subtotal, desconto: s.desconto, frete: s.frete,
           total: s.total, status: "Pago", jogaJunto: s.jogaJunto }];
       }

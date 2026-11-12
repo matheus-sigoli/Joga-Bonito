@@ -177,6 +177,7 @@ BEGIN
         Parcelas        TINYINT       NOT NULL CONSTRAINT DF_Pedidos_Parcelas DEFAULT 1,
         CodigoRastreio  VARCHAR(20)   NULL,
         Origem          VARCHAR(10)   NOT NULL CONSTRAINT DF_Pedidos_Origem DEFAULT 'Web',
+        ChaveIdempotencia UNIQUEIDENTIFIER NULL, -- mesma tentativa de compra reenviada = mesmo pedido
         AtualizadoEm    DATETIME2     NULL,
         CONSTRAINT FK_Pedidos_Usuarios  FOREIGN KEY (UsuarioId)  REFERENCES dbo.Usuarios(Id),
         CONSTRAINT FK_Pedidos_Enderecos FOREIGN KEY (EnderecoId) REFERENCES dbo.Enderecos(Id),
@@ -289,6 +290,8 @@ IF COL_LENGTH('dbo.Usuarios', 'VersaoToken') IS NULL
     ALTER TABLE dbo.Usuarios ADD VersaoToken INT NOT NULL CONSTRAINT DF_Usuarios_VersaoToken DEFAULT 1;
 IF COL_LENGTH('dbo.Pedidos', 'ValorJogaJunto') IS NULL
     ALTER TABLE dbo.Pedidos ADD ValorJogaJunto DECIMAL(10,2) NOT NULL CONSTRAINT DF_Pedidos_JogaJunto DEFAULT 0;
+IF COL_LENGTH('dbo.Pedidos', 'ChaveIdempotencia') IS NULL
+    ALTER TABLE dbo.Pedidos ADD ChaveIdempotencia UNIQUEIDENTIFIER NULL;
 IF COL_LENGTH('dbo.Avaliacoes', 'Status') IS NULL
     ALTER TABLE dbo.Avaliacoes ADD
         Status VARCHAR(12) NOT NULL CONSTRAINT DF_Avaliacoes_Status DEFAULT 'Publicada'
@@ -333,6 +336,9 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_ProdutoImagens_Produto
     CREATE INDEX IX_ProdutoImagens_Produto ON dbo.ProdutoImagens (ProdutoId, Ordem);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedidos_Usuario_Data')
     CREATE INDEX IX_Pedidos_Usuario_Data ON dbo.Pedidos (UsuarioId, DataPedido DESC);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_Pedidos_Usuario_Chave')
+    CREATE UNIQUE INDEX UX_Pedidos_Usuario_Chave ON dbo.Pedidos (UsuarioId, ChaveIdempotencia)
+        WHERE ChaveIdempotencia IS NOT NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Pedidos_Status')
     CREATE INDEX IX_Pedidos_Status ON dbo.Pedidos (StatusPedido) INCLUDE (ValorTotal, DataPedido);
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_ItensPedido_Pedido')
@@ -566,11 +572,26 @@ CREATE OR ALTER PROCEDURE dbo.sp_RegistrarPedido
     @CodigoCupom     VARCHAR(30)  = NULL,
     @EnderecoId      INT          = NULL,
     @Origem          VARCHAR(10)  = 'Web',
-    @PedidoId        INT OUTPUT
+    @PedidoId        INT OUTPUT,
+    @ChaveIdempotencia UNIQUEIDENTIFIER = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
+
+    -- Idempotência: a conexão caiu depois que o pedido foi gravado e o cliente reenviou a MESMA
+    -- tentativa de compra (mesma chave). Devolve o pedido já feito, sem cobrar nem baixar estoque de novo.
+    IF @ChaveIdempotencia IS NOT NULL
+    BEGIN
+        SELECT @PedidoId = Id FROM dbo.Pedidos
+         WHERE UsuarioId = @UsuarioId AND ChaveIdempotencia = @ChaveIdempotencia;
+        IF @PedidoId IS NOT NULL
+        BEGIN
+            SELECT Id, Subtotal, Desconto, Frete, ValorTotal, ValorJogaJunto, CodigoRastreio, StatusPedido
+            FROM dbo.Pedidos WHERE Id = @PedidoId;
+            RETURN;
+        END
+    END
 
     DECLARE @Itens TABLE (ProdutoId INT, Tamanho VARCHAR(5), Quantidade INT, PrecoUnitario DECIMAL(10,2));
 
@@ -633,11 +654,11 @@ BEGIN
 
         INSERT INTO dbo.Pedidos
             (UsuarioId, EnderecoId, CupomId, Subtotal, Desconto, Frete, ValorTotal, ValorJogaJunto,
-             StatusPedido, FormaPagamento, Parcelas, Origem)
+             StatusPedido, FormaPagamento, Parcelas, Origem, ChaveIdempotencia)
         VALUES
             (@UsuarioId, @EnderecoId, @CupomId, @Subtotal, @Desconto, @Frete, @Subtotal - @Desconto + @Frete,
              dbo.fn_CalcularJogaJunto(@Subtotal - @Desconto),
-             'Pago', @FormaPagamento, ISNULL(@Parcelas, 1), ISNULL(@Origem, 'Web'));
+             'Pago', @FormaPagamento, ISNULL(@Parcelas, 1), ISNULL(@Origem, 'Web'), @ChaveIdempotencia);
 
         SET @PedidoId = SCOPE_IDENTITY();
 

@@ -158,6 +158,16 @@
       document.querySelector(`.etapas [data-etapa="${k}"]`).classList.toggle("ativa", k <= n);
     });
     if (n === 2) escolherMetodo(metodo);
+    // O botão que levou à etapa some junto com a etapa anterior: sem isto o foco sai da
+    // janela e quem usa teclado ou leitor de tela fica perdido (achado nos testes manuais).
+    if (!$("checkout").open) return;
+    if (n === 1) $("cep").focus();
+    else if (n === 2) document.querySelector(".metodo.selecionado")?.focus();
+    else {
+      const titulo = document.querySelector("#etapa-3 h3");
+      titulo.tabIndex = -1;
+      titulo.focus();
+    }
   }
 
   $("fechar-checkout").addEventListener("click", () => {
@@ -298,6 +308,22 @@
     return Object.values(erros).every(m => !m);
   }
 
+  // Chave de idempotência: uma por tentativa de compra (mesmo carrinho). Se a resposta se perder
+  // (PC lento, Wi-Fi caiu) e a pessoa confirmar de novo, a API devolve o MESMO pedido — não compra
+  // duas vezes. Fica na sessão para valer também se a janela for fechada e aberta de novo.
+  function chaveDaCompra() {
+    const conteudo = JSON.stringify(JB.carrinho.paraApi());
+    try {
+      const salva = JSON.parse(sessionStorage.getItem("jb_chave_pedido") || "null");
+      if (salva && salva.conteudo === conteudo) return salva.chave;
+    } catch { /* sessionStorage indisponível: usa uma chave só desta tentativa */ }
+    const chave = crypto.randomUUID ? crypto.randomUUID()
+      : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
+          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+    try { sessionStorage.setItem("jb_chave_pedido", JSON.stringify({ conteudo, chave })); } catch { }
+    return chave;
+  }
+
   $("confirmar-pagamento").addEventListener("click", async () => {
     if (enviando) return;
     if (metodo !== "PIX" && !validarCartao()) return;
@@ -313,11 +339,13 @@
       await new Promise(r => setTimeout(r, 900));
       const parcelas = metodo === "Cartão de Crédito" ? Number($("parcelas").value) : 1;
       const pedido = await JB.api("/api/pedidos", {
-        metodo: "POST", autenticado: true,
+        metodo: "POST", autenticado: true, timeout: 30000,
+        cabecalhos: { "Idempotency-Key": chaveDaCompra() },
         corpo: { itens: JB.carrinho.paraApi(), formaPagamento: metodo, parcelas, cupom: cupom || null, endereco, origem: "Web" }
       });
       clearInterval(timerPix);
       JB.carrinho.limpar();
+      try { sessionStorage.removeItem("jb_chave_pedido"); } catch { }
       $("sucesso-numero").textContent = `#${pedido.pedidoId}`;
       $("sucesso-pagamento").textContent = `${metodo}${parcelas > 1 ? ` em ${parcelas}x` : ""} · ${JB.brl(pedido.total)}`;
       $("sucesso-rastreio").textContent = pedido.codigoRastreio;
@@ -325,11 +353,15 @@
         ? `${JB.brl(pedido.jogaJunto)} deste pedido foram registrados para o programa Joga Junto.` : "";
       abrirEtapa(3);
     } catch (e) {
-      JB.aviso($("aviso-etapa-2"), e.message);
+      JB.aviso($("aviso-etapa-2"), e.status === 0
+        ? "O servidor demorou para responder. Confirme de novo: se o pedido já tiver sido feito, ele não será duplicado."
+        : e.message);
     } finally {
       enviando = false;
       btn.disabled = false;
       btn.textContent = metodo === "PIX" ? "Já paguei — confirmar" : "Pagar agora";
+      // O botão ficou desativado durante o envio e o navegador tirou o foco dele: devolve.
+      if (!$("etapa-2").hidden) btn.focus();
     }
   });
 
