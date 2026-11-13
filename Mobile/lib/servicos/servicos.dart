@@ -181,6 +181,10 @@ class CatalogoServico {
   static const _chaveCache = 'jb_cache_produtos';
   static const _chaveCacheData = 'jb_cache_data';
 
+  /// Data da última sincronização, para telas que ficam abertas (o Perfil vive num
+  /// IndexedStack e não seria reconstruído quando o catálogo carregasse depois).
+  final ValueNotifier<DateTime?> sincronizado = ValueNotifier(null);
+
   /// Retorna (produtos, veioDoCache).
   Future<(List<Produto>, bool)> listar({String? categoria, String? linha, String? busca, String ordem = 'relevancia'}) async {
     final params = <String, String>{
@@ -213,13 +217,17 @@ class CatalogoServico {
 
   Future<DateTime?> ultimaSincronizacao() async {
     final prefs = await SharedPreferences.getInstance();
-    return DateTime.tryParse(prefs.getString(_chaveCacheData) ?? '');
+    final d = DateTime.tryParse(prefs.getString(_chaveCacheData) ?? '');
+    sincronizado.value = d;
+    return d;
   }
 
   Future<void> _salvarCache(List dados) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_chaveCache, jsonEncode(dados));
-    await prefs.setString(_chaveCacheData, DateTime.now().toIso8601String());
+    final agora = DateTime.now();
+    await prefs.setString(_chaveCacheData, agora.toIso8601String());
+    sincronizado.value = agora;
   }
 
   Future<List<Produto>> _lerCache() async {

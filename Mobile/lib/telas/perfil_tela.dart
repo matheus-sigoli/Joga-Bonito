@@ -20,21 +20,16 @@ class PerfilTela extends StatefulWidget {
 }
 
 class _PerfilTelaState extends State<PerfilTela> {
-  DateTime? _sincronizado;
-
   @override
   void initState() {
     super.initState();
-    catalogo.ultimaSincronizacao().then((d) {
-      if (mounted) setState(() => _sincronizado = d);
-    });
+    catalogo.ultimaSincronizacao();
   }
 
   Future<void> _configurarServidor() async {
     if (await conectarLoja(context)) {
       // Novo servidor: o catálogo offline antigo é de outra loja/versão
-      final d = await catalogo.ultimaSincronizacao();
-      if (mounted) setState(() => _sincronizado = d);
+      await catalogo.ultimaSincronizacao();
     }
     if (mounted) setState(() {});
   }
@@ -229,12 +224,15 @@ class _PerfilTelaState extends State<PerfilTela> {
                 isThreeLine: true,
                 onTap: _configurarServidor,
               ),
-              ListTile(
-                leading: const Icon(Icons.sync),
-                title: const Text('Catálogo offline'),
-                subtitle: Text(_sincronizado == null
-                    ? 'Ainda não sincronizado'
-                    : 'Última sincronização: ${dataHora(_sincronizado!)}'),
+              ValueListenableBuilder<DateTime?>(
+                valueListenable: catalogo.sincronizado,
+                builder: (context, sincronizado, _) => ListTile(
+                  leading: const Icon(Icons.sync),
+                  title: const Text('Catálogo offline'),
+                  subtitle: Text(sincronizado == null
+                      ? 'Ainda não sincronizado'
+                      : 'Última sincronização: ${dataHora(sincronizado)}'),
+                ),
               ),
               const ListTile(
                 leading: Icon(Icons.accessibility_new),
