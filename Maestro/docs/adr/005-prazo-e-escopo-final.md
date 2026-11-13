@@ -1,6 +1,6 @@
 # ADR 005 — Prazo de 2 semanas: toda a lista entra no escopo
 
-**Data:** 27/10/2026 · **Situação:** aceita
+**Data:** 27/10/2026 · **Situação:** aceita e concluída em 13/11/2026
 
 ## Contexto
 Lista de pendências de 27/10/2026, com prazo de entrega em até 2 semanas (até ~10/11/2026).
@@ -40,3 +40,17 @@ Detalhes em [ADR 008](008-verificacao-final-nov-2026.md).
 | Site público | Conferido no navegador: inicial, login de demonstração, compra com Pix, painel admin |
 | Azure | Plano pronto; publicação continua adiada ([ADR 002](002-implantacao-azure-adiada.md)) |
 | Backlog | Sprint 6 estendida até 10/11; 157 de 165 pontos (95%) |
+
+## Situação final em 13/11/2026
+Detalhes em [ADR 009](009-app-conecta-na-loja-do-pc.md) e [ADR 010](010-testes-manuais-no-pc.md).
+
+| Item da lista | Situação |
+|---|---|
+| Executar todos os testes | Pipeline verde (6 jobs): unitários 104, integração 9, aceitação 81, E2E 31 e Flutter 26 |
+| Validar o banco | `conferencia.sql` 24/25 no PC (a 25ª só vale em produção) e 25/25 no pipeline |
+| Integração Web + Mobile + API | App no emulador Android ligado à API e ao banco no PC de um integrante (vídeo de 13/11): catálogo, produto, carrinho, checkout e perfil. Pedido com origem Mobile conferido no pipeline (E2E `test_31` e `validar_loja.py`) |
+| App Flutter | Pacotes nas versões do Flutter estável atual (`flutter_secure_storage` 11, `intl` 0.20, `flutter_lints` 6); correção da data do catálogo offline no Perfil |
+| Acessibilidade | Teclado, contraste, A+ 140% (reflow), VLibras e foco no checkout conferidos no PC em 11/11; leitor de tela coberto pelos testes automáticos. NVDA e TalkBack manuais não foram feitos |
+| Trabalho escrito | `PIM IV - Joga Bonito (atualizado 13-11).docx` (fora do repositório, ADR 006): capítulos de mobile, banco, pipeline, gestão, conclusão e apêndice atualizados |
+| Backlog | Sprint 6 estendida até 13/11; 176 de 176 pontos (itens 32 e 33 incluídos) |
+| Azure | Plano pronto; publicação continua adiada ([ADR 002](002-implantacao-azure-adiada.md)) |

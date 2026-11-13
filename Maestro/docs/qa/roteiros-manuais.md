@@ -32,6 +32,21 @@ Feita pelo Claude no PC, com o navegador embutido do app e o SSMS. O PC estava m
 Ficam para o grupo: roteiro 5 e 1 (celular real e TalkBack), NVDA (não instalado no PC), reiniciar o PC,
 Visual Studio F5 e `-SemRede` (precisa de argumento na linha de comando).
 
+## Execução de 13/11/2026 (vídeos do grupo: emulador Android + API e banco no PC de um integrante)
+
+Dois vídeos gravados pelo grupo e conferidos quadro a quadro. Projeto Flutter recriado no Flutter estável
+atual, com os pacotes novos (levados para `Mobile/` no mesmo dia).
+
+| Roteiro | Item | Resultado |
+|---|---|---|
+| 5 | 15:23 — app no emulador sem a API ligada: tela "Sem conexão" com **CONECTAR À LOJA** e **Tentar de novo**, sem travar | OK |
+| 5 | 19:27 — API no PC (`Now listening on http://0.0.0.0:5000`), app no emulador em `http://10.0.2.2:5000`: 36 produtos com fotos, filtros Seleções/Clubes e Campo/Society/Futsal | OK |
+| 5 | Produto (Nike Tiempo Legend TF), numeração, adicionar ao carrinho, carrinho com frete grátis | OK |
+| 5 | Login (conta do Bernardo) e Perfil: Conectar à loja, Meus dados (LGPD), Trocar senha, Sair de todos, Excluir conta | OK |
+| 5 | Checkout: CEP, endereço, Pix/Crédito/Débito, cupom e total | Tela OK; a compra não foi confirmada no vídeo (Meus pedidos vazio). Pedido com origem Mobile coberto no pipeline |
+| 5 | Perfil dizia "Catálogo offline: Ainda não sincronizado" com o catálogo carregado | **Corrigido** (`catalogo_sincronizado_test.dart`) |
+| 5 | Celular real com busca da loja na rede | Não gravado |
+
 ## 1. Leitor de tela no app (TalkBack no Android, VoiceOver no iOS)
 Ligue o leitor (Android: Configurações › Acessibilidade › TalkBack; iPhone: Ajustes › Acessibilidade › VoiceOver).
 
