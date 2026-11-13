@@ -4,21 +4,22 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.7.0 <4.0.0'
 
+# Versões testadas no celular real em 13/11/2026 (Flutter estável atual).
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.0
-  shared_preferences: ^2.2.2
-  intl: ^0.19.0
-  flutter_svg: ^2.0.10
-  flutter_secure_storage: ^9.2.2
+  http: ^1.6.0
+  shared_preferences: ^2.5.6
+  intl: ^0.20.3
+  flutter_svg: ^2.4.0
+  flutter_secure_storage: ^11.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
