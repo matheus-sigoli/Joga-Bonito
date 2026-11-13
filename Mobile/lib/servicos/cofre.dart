@@ -15,7 +15,8 @@ abstract class CofreToken {
 class CofreSeguro implements CofreToken {
   static const _chave = 'jb_token';
   static const _armazenamento = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+    // Versão 10+: chave no Android Keystore e dados cifrados por padrão (sem opção extra).
+    aOptions: AndroidOptions(),
     iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
   );
 
