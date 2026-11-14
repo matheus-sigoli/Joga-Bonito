@@ -3,7 +3,7 @@
 #
 #   iniciar-projeto.bat            liga tudo e abre a loja (dois cliques)
 #   parar-projeto.bat              desliga a API
-#   ligar-com-o-windows.bat        a API passa a ligar sozinha ao entrar no Windows
+#   scripts\ligar-com-o-windows.bat   a API passa a ligar sozinha ao entrar no Windows
 #
 # O que este script faz, nesta ordem:
 #   1. Se a API já está no ar, só abre a loja.
@@ -529,7 +529,7 @@ function Ligar-Com-Windows {
     $lnk.Description = 'Liga a API da loja Joga Bonito ao entrar no Windows'
     $lnk.Save()
     Ok 'Pronto: a API da Joga Bonito vai ligar sozinha sempre que você entrar no Windows.'
-    Escrever '       Para desfazer: desligar-com-o-windows.bat' 'DarkGray'
+    Escrever '       Para desfazer: scripts\desligar-com-o-windows.bat' 'DarkGray'
 }
 
 function Desligar-Com-Windows {

@@ -16,7 +16,7 @@ em sites sem credibilidade acadêmica".
   trabalhos acadêmicos da UNIP (e na cópia impressa ao coordenador).
 
 ## Consequências
-- O código, os scripts do banco, as figuras (`ABNT/figuras`) e o site da Vercel continuam
+- O código, os scripts do banco, as figuras (`docs/abnt/figuras`, antes `ABNT/figuras`) e o site da Vercel continuam
   públicos: não são o texto do trabalho.
 - O histórico do GitHub foi reescrito (`git filter-repo`) e enviado com push forçado. Quem tiver
   um clone antigo precisa clonar de novo.

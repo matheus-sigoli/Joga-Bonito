@@ -104,14 +104,14 @@ Rode num Windows real: o lançador não pode ser executado no ambiente de CI (Li
 - [ ] Só com LocalDB (Visual Studio, sem SQL Express): o lançador usa `(localdb)\MSSQLLocalDB`.
 - [ ] Segunda execução com a API já ligada: só abre o navegador, sem recompilar.
 - [ ] `parar-projeto.bat`: a loja mostra a faixa "Reconectando à loja"; ao rodar `iniciar-projeto.bat` de novo, a página se atualiza sozinha.
-- [ ] `ligar-com-o-windows.bat`, sair e entrar no Windows: http://localhost:5000 responde sem abrir nada. `desligar-com-o-windows.bat` desfaz.
+- [ ] `scripts\ligar-com-o-windows.bat`, sair e entrar no Windows: http://localhost:5000 responde sem abrir nada. `scripts\desligar-com-o-windows.bat` desfaz.
 - [ ] Editar o preço de um produto em `Site/Javascript/catalogo-local.js` com a API ligada e salvar: em até 5 s o novo preço aparece na loja (e em `api.log`: "catalogo-local.js alterado").
 - [ ] Abrir `Site/HTML/inicial.html` com dois cliques (file://) com a API ligada: o navegador vai para http://localhost:5000/HTML/inicial.html.
 - [ ] `iniciar-com-celular.bat`: pede administrador uma vez (firewall) e mostra `CELULAR http://192.168.x.x:5000`; o app conecta (roteiro 5).
 - [ ] `iniciar-projeto.bat -SemRede`: a linha CELULAR some (a loja volta a aceitar só este PC).
 
 ## 5. App no celular Android real, ligado à loja do PC (sem Azure)
-Decisões em `Maestro/docs/adr/003-app-testado-em-celular-real.md` e `009-app-conecta-na-loja-do-pc.md`.
+Decisões em `docs/adr/003-app-testado-em-celular-real.md` e `009-app-conecta-na-loja-do-pc.md`.
 PC e celular **na mesma rede Wi-Fi** (de casa ou da escola; não use rede de visitantes).
 
 No PC (uma vez por teste):

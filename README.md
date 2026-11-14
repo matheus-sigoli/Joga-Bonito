@@ -12,7 +12,7 @@ Solução completa de comércio eletrônico para a **Joga Bonito**, loja de cami
 | Nuvem | Azure (App Service, Azure SQL, Key Vault, Application Insights) como código | `infra/main.bicep` |
 | DevOps | Docker, Docker Compose, GitHub Actions | `docker-compose.yml`, `.github/workflows` |
 | Ágil | Backlog, sprints, cronograma, Kanban, burndown (planilha `.xlsx`) | entregue com o trabalho |
-| Documento | Trabalho ABNT do PIM IV (.docx + PDF); figuras e fontes dos diagramas | entregue pelo sistema da UNIP; figuras em `ABNT/figuras` |
+| Documento | Trabalho ABNT do PIM IV (.docx + PDF); figuras e fontes dos diagramas | entregue pelo sistema da UNIP; figuras em `docs/abnt/figuras` |
 
 ## Situação final (13/11/2026)
 
@@ -22,10 +22,43 @@ do app e 10 testes do código do app contra a API e o banco reais**, gera os doi
 
 - Loja pública (modo demonstração): https://joga-bonito-sigma.vercel.app
 - Testes manuais no Windows, no emulador Android (compra completa pelo app, pedido via Mobile) e no site publicado:
-  `Maestro/docs/qa/roteiros-manuais.md`
-- Decisões e situação final: `Maestro/docs/adr/` (ADR 005, 009 e 010)
+  `docs/qa/roteiros-manuais.md`
+- Decisões e situação final: `docs/adr/` (ADR 005, 009 e 010)
 
-> O trabalho escrito e a planilha de backlog não ficam neste repositório público: o manual do PIM (seção 7) trata a publicação do próprio trabalho como autoplágio, e a UNIP compara a entrega com o que está na internet. Ver `Maestro/docs/adr/006-documentos-fora-do-repositorio.md`.
+> O trabalho escrito e a planilha de backlog não ficam neste repositório público: o manual do PIM (seção 7) trata a publicação do próprio trabalho como autoplágio, e a UNIP compara a entrega com o que está na internet. Ver `docs/adr/006-documentos-fora-do-repositorio.md`.
+
+## Estrutura de pastas
+
+```
+Joga-Bonito/
+├── iniciar-projeto.bat        liga a loja (API + banco + site) e abre o login
+├── iniciar-com-celular.bat    idem, aberta também para o app no celular (mesmo Wi-Fi)
+├── parar-projeto.bat          desliga a API
+├── testar-tudo.bat            roda todos os testes e mostra um resumo
+├── README.md · SEGURANCA.md   visão geral e auditoria de segurança
+├── JogaBonito.sln             solução do Visual Studio (API + testes)
+├── docker-compose.yml         SQL Server + API em contêineres
+├── vercel.json                site público em modo demonstração
+│
+├── Site/                      sistema web
+│   ├── HTML/ CSS/ Javascript/ IMG/   páginas, estilos, scripts e imagens
+│   ├── backend/               API REST .NET 8 (Api, Aplicacao, Dominio, Infraestrutura)
+│   ├── banco/                 schema.sql, seed.sql e conferência do banco
+│   ├── tests/                 unitários, integração, E2E (Playwright) e aceitação
+│   └── ferramentas/           lançador (jogabonito.ps1), testes, catálogo e publicação
+├── Mobile/                    app Flutter: lib/, test/, integracao/ (contra a API real)
+├── infra/                     Azure como código (Bicep) e guia de implantação
+├── docs/                      documentação técnica
+│   ├── adr/                   decisões do projeto (001 a 010)
+│   ├── qa/                    roteiros de testes manuais e relatórios
+│   ├── prd/ arquitetura/ design-system/   requisitos, arquitetura e identidade visual
+│   ├── abnt/figuras/          figuras do trabalho escrito e fontes dos diagramas
+│   ├── capturas/              capturas de tela do site
+│   └── glossario.md · contexto-projeto.md
+├── scripts/                   apoio: ligar/desligar com o Windows, gerar-env (.env do Docker)
+├── Maestro/                   agentes de IA usados no processo (método Maestro)
+└── .github/workflows/         pipeline CI/CD (6 jobs) e site público
+```
 
 ## Como rodar no computador
 
@@ -46,7 +79,7 @@ Requisitos: **.NET 8 SDK** e um **SQL Server** (Express, instância padrão ou L
 | `iniciar-projeto.bat` / atalho **Joga Bonito** | Liga a loja (se ainda não estiver no ar) e abre o login |
 | `iniciar-com-celular.bat` | Abre a loja também para o **app no celular** (mesmo Wi-Fi): libera o firewall só para a rede local e mostra o endereço. Fica lembrado; `iniciar-projeto.bat -SemRede` desfaz |
 | `parar-projeto.bat` | Desliga a API (necessário só para depurar pelo Visual Studio) |
-| `desligar-com-o-windows.bat` / `ligar-com-o-windows.bat` | Desliga ou religa o início automático |
+| `scripts\ligar-com-o-windows.bat` / `scripts\desligar-com-o-windows.bat` | Desliga ou religa o início automático |
 
 **Sem "erro de conexão" no login:**
 - **Página aberta fora da API** (Live Server do VS Code, `127.0.0.1:5500` ou HTML aberto com dois cliques): ela é reaberta na loja servida pela API, onde a sessão funciona.
@@ -58,7 +91,7 @@ Requisitos: **.NET 8 SDK** e um **SQL Server** (Express, instância padrão ou L
 
 **Visual Studio:** F5 abre a loja no login. Se aparecer "a porta já está em uso", a loja já está no ar pelo início automático: rode `parar-projeto.bat` antes de depurar.
 
-O log fica em `%LOCALAPPDATA%\JogaBonito\logs\api.log`. Para testar o app num **celular físico** na mesma rede: `iniciar-com-celular.bat` e, no app, **Conectar à loja › Procurar a loja na rede** (roteiro 5 em `Maestro/docs/qa/roteiros-manuais.md`).
+O log fica em `%LOCALAPPDATA%\JogaBonito\logs\api.log`. Para testar o app num **celular físico** na mesma rede: `iniciar-com-celular.bat` e, no app, **Conectar à loja › Procurar a loja na rede** (roteiro 5 em `docs/qa/roteiros-manuais.md`).
 
 ### Opção 2 — Site público (Vercel), sem servidor
 Para divulgar a loja num link, há uma versão que roda inteira no navegador de quem visita:
@@ -82,7 +115,7 @@ Depois abra http://localhost:8080.
 
 ### Opção 3 — Docker
 ```bash
-powershell -ExecutionPolicy Bypass -File gerar-env.ps1   # Windows (ou: sh gerar-env.sh)
+powershell -ExecutionPolicy Bypass -File scripts\gerar-env.ps1   # Windows (ou: sh scripts/gerar-env.sh)
 docker compose up -d --build
 ```
 O `gerar-env` cria um `.env` com senha do SQL Server, chave JWT e chave de criptografia dos dados (`DADOS_CHAVE`) aleatórias, só deste computador — guarde uma cópia da `DADOS_CHAVE`. Rodando de novo, ele só acrescenta o que faltar. Sem ele o Docker Compose não sobe. O banco fica acessível apenas em `127.0.0.1:1433`.

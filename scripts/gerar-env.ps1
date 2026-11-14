@@ -1,8 +1,8 @@
 ﻿# Gera o .env do docker-compose com segredos aleatórios e exclusivos deste computador.
-# Uso: powershell -ExecutionPolicy Bypass -File gerar-env.ps1
+# Uso: powershell -ExecutionPolicy Bypass -File scripts\gerar-env.ps1
 # Se o .env já existe, só acrescenta o que faltar (nunca troca um segredo existente:
 # trocar DADOS_CHAVE tornaria ilegíveis os endereços já cifrados no banco).
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)   # o .env fica na raiz, junto do docker-compose.yml
 
 function Aleatorio([int]$n) {
   $bytes = New-Object byte[] 96

@@ -15,4 +15,4 @@
 | **Endereço cifrado** | Rua, número etc. gravados com AES-256-GCM pela API, com prefixo `enc1:`. |
 | **Build de depuração** | App gerado por `flutter run`: aceita HTTP na rede local para falar com a loja no PC. |
 | **APK de produção** | `flutter build apk --release`: só aceita HTTPS, ou seja, precisa da loja publicada. |
-| **ADR** | Registro de decisão do projeto (`Maestro/docs/adr/`). |
+| **ADR** | Registro de decisão do projeto (`docs/adr/`). |

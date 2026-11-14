@@ -16,7 +16,7 @@ Flutter 3.47.8 em `C:\flutter`, Android SDK em `C:\Android` (licenças aceitas),
 usuário, com `ANDROID_HOME=C:\Android`. Funciona com o JDK 25 já instalado. `flutter analyze` sem
 avisos (4 APIs obsoletas trocadas), 15 testes OK, `flutter build apk --debug` OK. O primeiro build
 leva ~25 min (download do Gradle); os seguintes são rápidos. Passo a passo do celular:
-`Maestro/docs/qa/roteiros-manuais.md`, roteiro 5.
+`docs/qa/roteiros-manuais.md`, roteiro 5.
 
 ## Consequências
 - A loja sobe com `iniciar-projeto.bat -Rede` (aceita conexões da rede local) e o app aponta

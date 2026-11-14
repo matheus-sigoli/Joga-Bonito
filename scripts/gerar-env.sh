@@ -3,7 +3,7 @@
 # Se o .env já existe, só acrescenta o que faltar (nunca troca um segredo existente:
 # trocar DADOS_CHAVE tornaria ilegíveis os endereços já cifrados no banco).
 set -e
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."   # o .env fica na raiz, junto do docker-compose.yml
 aleatorio() { head -c 96 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c "$1"; }
 touch .env
 chmod 600 .env

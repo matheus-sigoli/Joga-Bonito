@@ -99,7 +99,7 @@ Pull requests para a `main` rodam só os testes.
 | Joga Junto, LGPD e acessibilidade | `validar_loja.py` (cálculo, exportar, excluir) + roteiros manuais 1, 2 e 5 | — |
 | Segurança e operação em produção | `bash infra/conferir-azure.sh rg-jogabonito` (App Service, Key Vault, firewall, TDE, backups, alertas, App Insights, contas de demonstração) | Cloud Shell |
 
-Os roteiros manuais estão em `Maestro/docs/qa/roteiros-manuais.md`.
+Os roteiros manuais estão em `docs/qa/roteiros-manuais.md`.
 
 **Validar em produção cria dados de teste:** dois clientes, pedidos e um produto. No fim, o script cancela os pedidos (o estoque volta), desativa o produto e exclui as contas (LGPD). Ficam pedidos cancelados de "Cliente removido".
 
