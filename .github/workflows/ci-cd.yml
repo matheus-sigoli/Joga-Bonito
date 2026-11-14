@@ -93,7 +93,7 @@ jobs:
           dotnet-version: 8.0.x
       - name: Testes de integração (cadastro, compra, estoque, concorrência, permissões, moderação, LGPD)
         run: dotnet test Site/tests/JogaBonito.IntegrationTests/JogaBonito.IntegrationTests.csproj -c Release --logger "console;verbosity=normal"
-      - name: Aceitação — fluxo completo contra a API real (75 verificações)
+      - name: Aceitação — fluxo completo contra a API real (81 verificações)
         env:
           ASPNETCORE_ENVIRONMENT: Development
           Urls: http://localhost:5000
@@ -106,6 +106,17 @@ jobs:
         run: |
           docker run --rm --network host -v "$PWD/Site/banco:/banco:ro" mcr.microsoft.com/mssql-tools \
             /opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P 'CiTeste#2026Senha' -d JogaBonitoDB -b -W -i /banco/conferencia.sql
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: App contra a API real (código do app — roteiro 5 sem a tela)
+        working-directory: Mobile
+        env:
+          JB_API: http://localhost:5000
+        run: |
+          flutter pub get
+          sleep 61   # janela do limite de logins por minuto, gasta pela aceitação acima
+          flutter test integracao/ --reporter expanded || { tail -60 ../api.log; exit 1; }
 
   mobile:
     name: App Flutter — análise e testes
