@@ -46,6 +46,8 @@ atual, com os pacotes novos (levados para `Mobile/` no mesmo dia).
 | 5 | Checkout: CEP, endereço, Pix/Crédito/Débito, cupom e total | Tela OK; a compra não foi confirmada no vídeo (Meus pedidos vazio). Pedido com origem Mobile coberto no pipeline |
 | 5 | Perfil dizia "Catálogo offline: Ainda não sincronizado" com o catálogo carregado | **Corrigido** (`catalogo_sincronizado_test.dart`) |
 | 5 | Celular real com busca da loja na rede | Não gravado |
+| 5 | 21:50 — compra completa no emulador: Nike Mercurial Vapor TF (41) + Corinthians 2012 Retrô (G), Pix, **Pedido confirmado** nº 4 (R$ 899,80, rastreio JB000000004BR, Joga Junto R$ 9,00), em *Meus pedidos* como Pago, "via Mobile" | OK |
+| 5 | CEP 04478619 não existe no ViaCEP: o app avisou "CEP não encontrado: preencha o endereço à mão" e a compra seguiu | OK (comportamento esperado) |
 
 ## Execução de 13/11/2026, noite (Claude: pipeline, site publicado e PC do Matheus)
 
