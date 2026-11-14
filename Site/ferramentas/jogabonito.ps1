@@ -298,6 +298,15 @@ function Compilar-SeNecessario {
     }
     Escrever '  ...  compilando a API (só na primeira vez ou quando o código muda)' 'Cyan'
     $log = Join-Path $PastaLogs 'compilacao.log'
+    # O publish só sobrescreve arquivos MAIS NOVOS: se outra pasta do projeto (ex.: a cópia antiga e a
+    # do git) compilou depois, a DLL dela ficaria no lugar e a API subiria com o código velho, sem erro.
+    # Achado no teste de 13/11 (/api/loja respondendo 404). Apaga as DLLs da API antes de publicar.
+    try {
+        Get-ChildItem -Path $PastaApi -Filter 'JogaBonito.Api.*' -File -ErrorAction SilentlyContinue |
+            Remove-Item -Force -ErrorAction Stop
+    } catch {
+        throw "Não consegui substituir a API compilada (arquivo em uso). Rode parar-projeto.bat e tente de novo."
+    }
     & dotnet publish $Projeto -c Release -o $PastaApi --nologo -v q *> $log
     if ($LASTEXITCODE -ne 0) {
         Get-Content $log -Tail 25 | ForEach-Object { Write-Host "       $_" -ForegroundColor DarkRed }
@@ -410,6 +419,14 @@ function Iniciar {
     }
 
     $estado = Estado-Api
+    # Ligada pelo lançador, mas com código de outra pasta ou de antes de um git pull: religa com o código novo
+    if (($estado -in 'pronta', 'lenta') -and (Processo-Api) -and (Test-Path $ArqVersao) -and
+        ((Get-Content $ArqVersao) -ne (Versao-Codigo))) {
+        Aviso 'O código mudou desde que a API foi ligada: religando com o código desta pasta...'
+        Parar -Quieto
+        Start-Sleep -Seconds 1
+        $estado = 'fora'
+    }
     if ($estado -eq 'pronta') {
         Ok 'A API já está no ar'
         if ($Rede -and -not (Processo-Api)) {

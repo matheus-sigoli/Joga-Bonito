@@ -1,4 +1,4 @@
-# ADR 010 — Testes manuais no PC: pedido idempotente, foco no checkout, reflow e lançador em PC lento
+# ADR 010 — Testes manuais no PC: pedido idempotente, foco no checkout, reflow, lançador e erros de formulário
 
 **Data:** 11/11/2026 · **Situação:** aceita e aplicada
 
@@ -14,6 +14,8 @@ que os testes automáticos (CI em máquina rápida) não pegavam:
 | 2 | No checkout, ao passar de Endereço para Pagamento (e ao confirmar), o foco saía da janela e ia para "Pular para o conteúdo". | Quem usa teclado ou leitor de tela fica perdido no meio da compra (WCAG 2.4.3). |
 | 3 | `jogabonito.ps1 -Acao Status` dizia "API desligada" com a API no ar; a espera da inicialização tinha limite de 3 min com consultas de 4 s. | Lançador manda religar uma API que está funcionando; inicialização em PC lento termina em erro falso. |
 | 4 | Com alto contraste e fonte em 140%, num celular (375 px), as abas Campo/Society/Futsal e o e-mail da Política de Privacidade passavam da largura da tela. | Rolagem lateral (WCAG 1.4.10). |
+| 5 | (13/11) Com duas pastas do projeto no PC, o lançador dizia "API compilada", mas a API seguia com a DLL velha: `dotnet publish` não sobrescreve arquivo mais novo; e com a API ligada, rodar de outra pasta só dizia "já está no ar". | App não acha a loja (`/api/loja` 404) e o grupo testa código antigo sem perceber. |
+| 6 | (13/11) Login e cadastro: o erro era lido (`role=alert`), mas o foco ficava no botão e o campo errado não era marcado. | Quem usa leitor de tela não sabe qual campo corrigir (WCAG 3.3.1). |
 
 ## Decisão
 1. **Pedido idempotente.** O site e o app mandam o cabeçalho `Idempotency-Key` (UUID v4, um por tentativa
@@ -29,6 +31,9 @@ que os testes automáticos (CI em máquina rápida) não pegavam:
 3. **Lançador tolerante a PC lento.** `/health/ready` com 10 s; sem resposta, testa `/health/live`: respondendo,
    o estado é **lenta** ("API ligada, mas respondendo devagar") e não "desligada". Espera da inicialização: 6 min.
 4. **Reflow.** As abas de piso quebram linha no celular e textos legais quebram e-mails e links longos.
+5. **Lançador com duas pastas.** Antes de publicar, apaga as DLLs da API; e, se a API ligada foi compilada de
+   outro código (outra pasta ou antes de um `git pull`), religa com o código desta pasta.
+6. **Erro de formulário.** Campo errado com `aria-invalid`, ligado ao aviso por `aria-describedby`, e foco nele.
 
 ## Consequências
 - O "comprou duas vezes" deixa de depender da velocidade do PC ou da rede.
@@ -42,3 +47,5 @@ que os testes automáticos (CI em máquina rápida) não pegavam:
 - Manual (este PC): checkout inteiro só pelo teclado, com alto contraste e fonte 120%; no SQL Server real, dois envios
   simultâneos e um terceiro com a mesma chave geraram um pedido só e baixaram uma peça.
 - Reflow: as 11 páginas em 1280 px e 375 px com alto contraste e fonte 140%, sem rolagem lateral.
+- Lançador (13/11, PC do Matheus): "O código mudou… religando com o código desta pasta" e `/api/loja` 200.
+- E2E `test_32` (campo marcado e foco); teste do app contra a API real `Mobile/integracao/app_na_loja_test.dart`.

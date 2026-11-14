@@ -47,6 +47,23 @@ atual, com os pacotes novos (levados para `Mobile/` no mesmo dia).
 | 5 | Perfil dizia "Catálogo offline: Ainda não sincronizado" com o catálogo carregado | **Corrigido** (`catalogo_sincronizado_test.dart`) |
 | 5 | Celular real com busca da loja na rede | Não gravado |
 
+## Execução de 13/11/2026, noite (Claude: pipeline, site publicado e PC do Matheus)
+
+| Roteiro | Item | Resultado |
+|---|---|---|
+| 5 | Código do app contra a API e o SQL Server reais (`Mobile/integracao/app_na_loja_test.dart`, job de integração): acha a loja em `/api/loja`, cadastro e login por token (só no cofre), 36 produtos com foto, CEP 01310-100 pelo ViaCEP, compra Pix com origem Mobile, reenvio com a mesma chave = mesmo pedido, estoque baixa uma vez, Vendas por canal +1 | OK (10/10) |
+| 5 | Avaliação 5 estrelas pelo app aparece na lista do produto; Meus dados (LGPD) traz conta, pedido e avaliação | OK |
+| 5 | Pedido do app cancelado pelo **site** (cookie de sessão): app vê Cancelado, estoque volta, Vendas por canal −1 | OK |
+| 5 | Sem conexão: catálogo salvo aparece em vez de travar; excluir a conta pelo app encerra a sessão e o login deixa de valer | OK |
+| 2 | VLibras 7.12.2 traduzindo no produto ("LOJA"), no carrinho ("Seu carrinho está vazio") e no painel admin ("FATURAMENTO") | OK |
+| 2 | Leitor de tela (árvore de acessibilidade, no lugar do NVDA): rótulos de cadastro e login corretos; erro anunciado por `role=alert` | OK |
+| 2 | O foco ficava no botão e o campo errado não era marcado | **Corrigido**: `aria-invalid`, `aria-describedby` e foco no campo (E2E `test_32`) |
+
+| 4 | `iniciar-projeto.bat -SemRede` (PC do Matheus): religa a API só para este PC, apaga `modo-rede.txt`, resumo sem a linha CELULAR, Status "Celular (rede local): não", `http://192.168.1.166:5000` para de responder | OK |
+| 4 | Com duas pastas do projeto no mesmo PC (cópia antiga + git), a API subia com a DLL **velha** sem erro: o `dotnet publish` só sobrescreve arquivos mais novos (`/api/loja` dava 404) | **Corrigido** no lançador: apaga as DLLs antes de publicar e religa a API quando o código da pasta mudou. Conferido no PC: "O código mudou… religando" e `/api/loja` 200 |
+
+Não feitos: TalkBack e celular real (sem aparelho), NVDA com voz (não instalado), reiniciar o PC e F5 no Visual Studio.
+
 ## 1. Leitor de tela no app (TalkBack no Android, VoiceOver no iOS)
 Ligue o leitor (Android: Configurações › Acessibilidade › TalkBack; iPhone: Ajustes › Acessibilidade › VoiceOver).
 

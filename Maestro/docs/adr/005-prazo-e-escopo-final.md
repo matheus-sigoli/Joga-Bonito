@@ -46,11 +46,11 @@ Detalhes em [ADR 009](009-app-conecta-na-loja-do-pc.md) e [ADR 010](010-testes-m
 
 | Item da lista | Situação |
 |---|---|
-| Executar todos os testes | Pipeline verde (6 jobs): unitários 104, integração 9, aceitação 81, E2E 31 e Flutter 26 |
+| Executar todos os testes | Pipeline verde (6 jobs): unitários 104, integração 9, aceitação 81, E2E 32, Flutter 26 e app contra a API real 10 |
 | Validar o banco | `conferencia.sql` 24/25 no PC (a 25ª só vale em produção) e 25/25 no pipeline |
-| Integração Web + Mobile + API | App no emulador Android ligado à API e ao banco no PC de um integrante (vídeo de 13/11): catálogo, produto, carrinho, checkout e perfil. Pedido com origem Mobile conferido no pipeline (E2E `test_31` e `validar_loja.py`) |
+| Integração Web + Mobile + API | App no emulador Android ligado à API e ao banco no PC de um integrante (vídeo de 13/11). Código do app contra a API e o SQL Server reais no pipeline: compra Mobile, avaliação, LGPD, cancelamento pelo site e Vendas por canal (10/10) |
 | App Flutter | Pacotes nas versões do Flutter estável atual (`flutter_secure_storage` 11, `intl` 0.20, `flutter_lints` 6); correção da data do catálogo offline no Perfil |
-| Acessibilidade | Teclado, contraste, A+ 140% (reflow), VLibras e foco no checkout conferidos no PC em 11/11; leitor de tela coberto pelos testes automáticos. NVDA e TalkBack manuais não foram feitos |
+| Acessibilidade | Teclado, contraste, A+ 140% (reflow) e foco no checkout conferidos no PC em 11/11; VLibras traduzindo em produto, carrinho e admin (13/11); leitor de tela pela árvore de acessibilidade e E2E `test_32`. NVDA com voz e TalkBack não foram feitos (sem NVDA instalado e sem celular) |
 | Trabalho escrito | `PIM IV - Joga Bonito (atualizado 13-11).docx` (fora do repositório, ADR 006): capítulos de mobile, banco, pipeline, gestão, conclusão e apêndice atualizados |
 | Backlog | Sprint 6 estendida até 13/11; 176 de 176 pontos (itens 32 e 33 incluídos) |
 | Azure | Plano pronto; publicação continua adiada ([ADR 002](002-implantacao-azure-adiada.md)) |

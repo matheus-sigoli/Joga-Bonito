@@ -14,6 +14,6 @@ Uma decisão nunca é apagada; quando muda, ganha um ADR novo que a substitui.
 | [007](007-revisao-do-documento-pelo-manual.md) | Revisão do trabalho escrito pelo manual do PIM IV | Aceita (aplicada) |
 | [008](008-verificacao-final-nov-2026.md) | Verificação final: pipeline, site publicado e VLibras 7.12 | Aceita (aplicada) |
 | [009](009-app-conecta-na-loja-do-pc.md) | App no celular conecta na loja do PC (rede local) | Aceita (aplicada) |
-| [010](010-testes-manuais-no-pc.md) | Testes manuais no PC: pedido idempotente, foco no checkout, reflow e lançador em PC lento | Aceita (aplicada) |
+| [010](010-testes-manuais-no-pc.md) | Testes manuais no PC: pedido idempotente, foco no checkout, reflow, lançador e erros de formulário | Aceita (aplicada) |
 
 Termos usados aqui: [glossário](../glossario.md).
