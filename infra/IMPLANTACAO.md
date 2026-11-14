@@ -74,7 +74,7 @@ git push origin main
 ```
 
 Cada push na `main` dispara, em ordem:
-1. **Testes, todos obrigatórios:** unitários .NET; integração com API real + SQL Server 2022; **roteiro de aceitação de 75 verificações contra a API real** seguido do `conferencia.sql` no banco; 26 testes E2E Playwright; `flutter analyze`, `flutter test` e APK apontando para `URL_LOJA`.
+1. **Testes, todos obrigatórios:** unitários .NET; integração com API real + SQL Server 2022; **roteiro de aceitação de 81 verificações contra a API real** seguido do `conferencia.sql` no banco e do teste do app contra a API real; 32 testes E2E Playwright; `flutter analyze`, `flutter test` e os APKs (produção e rede local).
 2. **Imagem Docker** no GHCR.
 3. **Deploy:**
    - login OIDC e leitura das saídas do Bicep;
@@ -90,9 +90,9 @@ Pull requests para a `main` rodam só os testes.
 | Item | Como validar | Onde |
 |---|---|---|
 | Testes automatizados | `testar-tudo.bat` (unitários, integração com o SQL local, E2E, aceitação, Flutter) — ou o próprio pipeline | Windows / GitHub Actions |
-| Fluxo completo de compra | `python Site/tests/aceitacao/validar_loja.py http://localhost:5000` (75 verificações) | Windows |
+| Fluxo completo de compra | `python Site/tests/aceitacao/validar_loja.py http://localhost:5000` (81 verificações) | Windows |
 | O mesmo em produção | `python Site/tests/aceitacao/validar_loja.py https://<loja> --admin-email <admin> --admin-senha <senha> --confirmo-producao` | qualquer PC |
-| Dados corretos no banco | `Site/banco/conferencia.sql` no SSMS / Azure Data Studio (23 regras: totais, frete, Joga Junto, estoque × auditoria, cancelamentos, moderação, criptografia, LGPD) | SSMS |
+| Dados corretos no banco | `Site/banco/conferencia.sql` no SSMS / Azure Data Studio (25 regras: totais, frete, Joga Junto, estoque × auditoria, cancelamentos, moderação, criptografia, LGPD) | SSMS |
 | Funções administrativas | seções "Permissões e painel" e "Avaliações e moderação" do `validar_loja.py` + roteiro manual 2 | — |
 | App em aparelho real | `Mobile/README.md` (endereço por ambiente) + roteiro manual 1 | Android |
 | Pedido do app aparece no site | roteiro manual 3 | Android + navegador |

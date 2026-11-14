@@ -6,13 +6,24 @@ Solução completa de comércio eletrônico para a **Joga Bonito**, loja de cami
 |---|---|---|
 | Site | HTML5 · CSS3 · JavaScript | `Site/HTML`, `Site/CSS`, `Site/Javascript` |
 | API REST | .NET 8 (camadas, JWT, BCrypt, Swagger) | `Site/backend` |
-| Testes | xUnit (unitários) · xUnit + SQL Server (integração) · Playwright (E2E) · flutter test | `Site/tests`, `Mobile/test` |
-| Banco de dados | SQL Server (13 tabelas, 12 índices, 3 views, 2 funções, 10 procedures, 3 triggers) | `Site/banco` |
+| Testes | xUnit (unitários) · xUnit + SQL Server (integração) · Playwright (E2E) · flutter test · app contra a API real | `Site/tests`, `Mobile/test`, `Mobile/integracao` |
+| Banco de dados | SQL Server (13 tabelas, 13 índices, 4 views, 2 funções, 10 procedures, 3 triggers) | `Site/banco` |
 | App | Flutter (Android/iOS) | `Mobile` |
 | Nuvem | Azure (App Service, Azure SQL, Key Vault, Application Insights) como código | `infra/main.bicep` |
 | DevOps | Docker, Docker Compose, GitHub Actions | `docker-compose.yml`, `.github/workflows` |
 | Ágil | Backlog, sprints, cronograma, Kanban, burndown (planilha `.xlsx`) | entregue com o trabalho |
 | Documento | Trabalho ABNT do PIM IV (.docx + PDF); figuras e fontes dos diagramas | entregue pelo sistema da UNIP; figuras em `ABNT/figuras` |
+
+## Situação final (13/11/2026)
+
+Projeto concluído. A cada envio para a `main`, o pipeline (6 jobs) roda **104 testes unitários, 9 de integração com
+SQL Server, 81 verificações de aceitação, 25 regras de conferência do banco, 32 testes E2E no navegador, 26 testes
+do app e 10 testes do código do app contra a API e o banco reais**, gera os dois APKs e publica a imagem Docker.
+
+- Loja pública (modo demonstração): https://joga-bonito-sigma.vercel.app
+- Testes manuais no Windows, no emulador Android (compra completa pelo app, pedido via Mobile) e no site publicado:
+  `Maestro/docs/qa/roteiros-manuais.md`
+- Decisões e situação final: `Maestro/docs/adr/` (ADR 005, 009 e 010)
 
 > O trabalho escrito e a planilha de backlog não ficam neste repositório público: o manual do PIM (seção 7) trata a publicação do próprio trabalho como autoplágio, e a UNIP compara a entrega com o que está na internet. Ver `Maestro/docs/adr/006-documentos-fora-do-repositorio.md`.
 
@@ -81,6 +92,8 @@ O site descobre sozinho onde está a API (`Site/Javascript/config.js`): servido 
 
 ### App mobile
 Veja `Mobile/README.md` (`flutter create .` → `flutter run`). O app aceita HTTP só para o PC na rede local (10.0.2.2, 192.168.x.x…); fora dela, exige HTTPS.
+Celular de verdade: `iniciar-com-celular.bat` no PC, APK **app-android-rede-local** do GitHub Actions e, no app,
+Perfil › Conectar à loja › Procurar a loja na rede (mesmo Wi-Fi).
 
 ## Contas de demonstração (somente Development)
 
@@ -98,19 +111,20 @@ Essas contas vêm de `Site/banco/demo.sql`, que **não é carregado em produçã
 
 **Tudo de uma vez no Windows:** `testar-tudo.bat`. Ele roda unitários, integração com o SQL Server local, E2E, aceitação contra a API real e o app Flutter, e mostra um resumo.
 
-**Validação de aceitação contra a API real** (75 verificações: sessão, 36 produtos, cupom, frete, Joga Junto, compra, cancelamento com devolução do estoque, permissões, painel admin, moderação e LGPD):
+**Validação de aceitação contra a API real** (81 verificações: sessão, 36 produtos, cupom, frete, Joga Junto, compra, pedido idempotente, cancelamento com devolução do estoque, permissões, painel admin, vendas por canal, moderação e LGPD):
 
 ```bash
 python Site/tests/aceitacao/validar_loja.py http://localhost:5000
 ```
 
-Depois, `Site/banco/conferencia.sql` confere no banco 23 regras de consistência: totais, frete, Joga Junto, estoque × auditoria, criptografia e LGPD.
+Depois, `Site/banco/conferencia.sql` confere no banco 25 regras de consistência: totais, frete, Joga Junto, estoque × auditoria, criptografia e LGPD.
 
 
 ```bash
 dotnet test Site/tests/JogaBonito.Tests             # unitários (regras, segurança, moderação, Joga Junto, LGPD)
-python Site/tests/e2e/test_loja.py                  # 30 testes no navegador com API simulada (Site/tests/e2e/README.md)
+python Site/tests/e2e/test_loja.py                  # 32 testes no navegador com API simulada (Site/tests/e2e/README.md)
 cd Mobile && flutter test                           # modelos, sessão segura, carrinho e leitor de tela
+JB_API=http://localhost:5000 flutter test integracao/  # código do app contra a API real (loja no ar)
 ```
 
 **Integração com a API real e o SQL Server** (cadastro, compra, baixa de estoque, cancelamento, duas compras simultâneas da última peça, permissões, moderação, LGPD, revogação de sessão, scripts rodando duas vezes sem duplicar):

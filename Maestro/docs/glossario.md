@@ -9,7 +9,7 @@
 | **Joga Junto** | Programa social: 1% do valor dos produtos com desconto (`Subtotal − Desconto`) de cada pedido, calculado por `dbo.fn_CalcularJogaJunto` e gravado em `Pedidos.ValorJogaJunto`. |
 | **Origem do pedido** | `Web` (site) ou `Mobile` (app). Os dois gravam no mesmo banco e aparecem no mesmo histórico. |
 | **Contas de demonstração** | `admin@jogabonito.com`, `matheus@estudante.com` e `professor@unip.br`, criadas pelo `demo.sql` só em Development. Nunca existem em produção. |
-| **Conferência do banco** | `Site/banco/conferencia.sql`: 23 regras de consistência, só leitura. Em Development, a regra 23 falha de propósito. |
+| **Conferência do banco** | `Site/banco/conferencia.sql`: 25 regras de consistência, só leitura. Em Development, a regra 25 (contas de demonstração) falha de propósito. |
 | **Moderação** | Avaliação com link fica **Pendente** até um administrador publicar; ocultar exige motivo (`sp_ModerarAvaliacao`). |
 | **Exclusão de conta (LGPD)** | O cliente confirma a senha; nome, e-mail e endereço são anonimizados (`sp_AnonimizarUsuario`) e os pedidos ficam no histórico sem dados pessoais. |
 | **Endereço cifrado** | Rua, número etc. gravados com AES-256-GCM pela API, com prefixo `enc1:`. |
