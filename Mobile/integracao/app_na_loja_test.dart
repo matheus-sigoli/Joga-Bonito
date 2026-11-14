@@ -56,6 +56,8 @@ void main() {
   late int totalCatalogo;
 
   setUpAll(() async {
+    // Pasta integracao/ (fora de test/, para não rodar no job sem API): o analisador não a vê como teste.
+    // ignore: invalid_use_of_visible_for_testing_member
     SharedPreferences.setMockInitialValues({});
     cofre = CofreMemoria();
     sessao = SessaoServico(cofre: cofre);

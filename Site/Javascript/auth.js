@@ -52,6 +52,22 @@
   }
 
   // ------------------------------------------------------------------ Login
+  // Erro de formulário para quem usa leitor de tela: o aviso (role=alert) é lido, o campo fica
+  // marcado como inválido e ligado ao aviso, e o foco vai para ele (WCAG 3.3.1). Achado ao conferir
+  // a árvore de acessibilidade em 13/11: o aviso era lido, mas o foco ficava no botão.
+  function erroNoCampo(form, campo, mensagem) {
+    form.querySelectorAll("[aria-invalid]").forEach(c => c.removeAttribute("aria-invalid"));
+    JB.aviso($("aviso"), mensagem);
+    if (!campo) return;
+    campo.setAttribute("aria-invalid", "true");
+    const ligados = new Set((campo.getAttribute("aria-describedby") || "").split(" ").filter(Boolean));
+    ligados.add("aviso");
+    campo.setAttribute("aria-describedby", [...ligados].join(" "));
+    campo.focus();
+  }
+  document.querySelectorAll("#form-login, #form-cadastro").forEach(f =>
+    f.addEventListener("input", e => e.target.removeAttribute?.("aria-invalid")));
+
   const formLogin = $("form-login");
   if (formLogin) {
     if (JB.sessao.logado()) location.href = destino;
@@ -59,7 +75,7 @@
       e.preventDefault();
       const email = $("email").value.trim();
       const senha = $("senha").value;
-      if (!email || !senha) return JB.aviso($("aviso"), "Preencha e-mail e senha.");
+      if (!email || !senha) return erroNoCampo(formLogin, $(email ? "senha" : "email"), "Preencha e-mail e senha.");
 
       const btn = $("btn-entrar");
       btn.disabled = true;
@@ -71,9 +87,9 @@
         // Página aberta fora da API (Live Server): segue para a loja servida pela API, já logado
         setTimeout(() => JB.FORA_DA_API ? JB.abrirNaApi(proxima, true) : (location.href = proxima), 500);
       } catch (err) {
-        JB.aviso($("aviso"), await mensagemDe(err));
         btn.disabled = false;
         btn.textContent = "Entrar";
+        erroNoCampo(formLogin, err.status === 401 ? $("senha") : null, await mensagemDe(err));
       }
     });
   }
@@ -98,13 +114,13 @@
       const email = $("email").value.trim();
       const senha = $("senha").value;
 
-      let erro = "";
-      if (nome.split(" ").filter(Boolean).length < 2) erro = "Informe nome e sobrenome.";
-      else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) erro = "Informe um e-mail válido.";
-      else if (!Object.values(regras).every(r => r(senha))) erro = "A senha precisa de 8+ caracteres, com letras e números.";
-      else if (senha !== $("confirmar").value) erro = "As senhas não conferem.";
-      else if (!$("lgpd").checked) erro = "Aceite a Política de Privacidade para continuar.";
-      if (erro) return JB.aviso($("aviso"), erro);
+      let erro = "", campo = null;
+      if (nome.split(" ").filter(Boolean).length < 2) [erro, campo] = ["Informe nome e sobrenome.", "nome"];
+      else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) [erro, campo] = ["Informe um e-mail válido.", "email"];
+      else if (!Object.values(regras).every(r => r(senha))) [erro, campo] = ["A senha precisa de 8+ caracteres, com letras e números.", "senha"];
+      else if (senha !== $("confirmar").value) [erro, campo] = ["As senhas não conferem.", "confirmar"];
+      else if (!$("lgpd").checked) [erro, campo] = ["Aceite a Política de Privacidade para continuar.", "lgpd"];
+      if (erro) return erroNoCampo(formCad, $(campo), erro);
 
       const btn = $("btn-cadastrar");
       btn.disabled = true;
@@ -116,9 +132,10 @@
         JB.aviso($("aviso"), "Conta criada! Redirecionando…", "sucesso");
         setTimeout(() => JB.FORA_DA_API ? JB.abrirNaApi(destino, true) : (location.href = destino), 700);
       } catch (err) {
-        JB.aviso($("aviso"), await mensagemDe(err));
         btn.disabled = false;
         btn.textContent = "Criar conta";
+        const msg = await mensagemDe(err);
+        erroNoCampo(formCad, /e-mail/i.test(msg) ? $("email") : null, msg);
       }
     });
   }

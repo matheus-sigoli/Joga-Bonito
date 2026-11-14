@@ -727,6 +727,28 @@ class TesteLoja(unittest.TestCase):
         expect(self.pagina.locator("#vendas-canal")).to_contain_text("App (celular)")
         expect(self.pagina.locator("#vendas-canal")).to_contain_text("Site")
 
+    def test_32_erro_de_formulario_marca_o_campo_e_leva_o_foco(self):
+        """Leitor de tela: além do aviso (role=alert), o campo errado fica aria-invalid,
+        ligado ao aviso por aria-describedby, e recebe o foco (WCAG 3.3.1)."""
+        self.abrir("cadastro.html")
+        p = self.pagina
+        p.fill("#nome", "Torcedor")
+        p.click("#btn-cadastrar")
+        expect(p.locator("#aviso")).to_have_text("Informe nome e sobrenome.")
+        expect(p.locator("#nome")).to_be_focused()
+        expect(p.locator("#nome")).to_have_attribute("aria-invalid", "true")
+        self.assertIn("aviso", p.get_attribute("#nome", "aria-describedby"))
+        p.fill("#nome", "Torcedor Teste")
+        expect(p.locator("#nome")).not_to_have_attribute("aria-invalid", "true")
+
+        self.abrir("login.html")
+        p.fill("#email", "matheus@estudante.com")
+        p.fill("#senha", "SenhaErrada#123")
+        p.click("#btn-entrar")
+        expect(p.locator("#aviso")).to_be_visible()
+        expect(p.locator("#senha")).to_be_focused()
+        expect(p.locator("#senha")).to_have_attribute("aria-invalid", "true")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
